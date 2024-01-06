@@ -115,7 +115,7 @@ typedef struct
 
 /********** Functions **********/
 void GPIO_Config(GPIO_Config_t *GPIO_Config, GPIO_TypeDef *Port, uint8_t Pin, uint8_t Mode, uint8_t OType, uint8_t OSpeed, uint8_t PUPD);
-void GPIO_Init(GPIO_Config_t *GPIO_Config);
+void GPIO_Init(GPIO_Config_t *GPIO_Config, AFR_Config_t alt_function);
 void GPIO_AlternateFunctionConfig(GPIO_Config_t *GPIO_Config, AFR_Config_t alt_function);
 void GPIO_PeriphClck(GPIO_TypeDef *GPIOx, FunctionalState state);
 void GPIO_WritePin(GPIO_Config_t *GPIO_Config, uint8_t State);

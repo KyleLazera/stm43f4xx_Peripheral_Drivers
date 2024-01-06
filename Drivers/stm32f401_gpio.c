@@ -157,6 +157,32 @@ void GPIO_PeriphClck(GPIO_TypeDef *GPIOx, FunctionalState state)
 }
 
 /*
+ * @brief	This function allows the user to set a specific GPIO pin in alternate function mode.
+ *
+ * @note	See the data-sheet for what each AF value is associated with for each port.
+ *
+ * @param	GPIO_Config: GPIO_Config: pointer to the GPIO_Config_t data structure that contains the
+ * 			configuration parameters for the specific GPIO pin.
+ *
+ * @param	alt_function: This will take in the alternate function value that the user wishes to use.
+ * 			The specific alternate function values and their functions are present in the data sheet.
+ * 			The inputs for this function are AF0 - AF15;
+ */
+void GPIO_AlternateFunctionConfig(GPIO_Config_t *GPIO_Config, AFR_Config_t alt_function)
+{
+	uint8_t pin = GPIO_Config->GPIO_Pin;
+	uint8_t alt_function_array = pin/8;
+
+	if(alt_function_array == 1)
+	{
+		pin -= 8;
+	}
+
+	GPIO_Config->GPIO_Port->AFR[alt_function_array] &= ~(AF15 << (pin * 4));
+	GPIO_Config->GPIO_Port->AFR[alt_function_array] |= (alt_function << (pin * 4));
+}
+
+/*
  * @brief	Initialize a specific GPIOx pin/port based on the GPIO_Config_t data structure parameters.
  *
  * @note	The RCC_AHB1Cmd() function is defined in the "stm32f401_rcc.c" driver, and enables
@@ -181,7 +207,7 @@ void GPIO_PeriphClck(GPIO_TypeDef *GPIOx, FunctionalState state)
  * @param	GPIO_Config: pointer to the GPIO_Config_t data structure that contains the
  * 			configuration parameters for the specific GPIO pin.
  */
-void GPIO_Init(GPIO_Config_t *GPIO_Config)
+void GPIO_Init(GPIO_Config_t *GPIO_Config, AFR_Config_t alt_function)
 {
 	uint8_t pin = GPIO_Config->GPIO_Pin;
 	uint32_t temp_variable;
@@ -223,6 +249,11 @@ void GPIO_Init(GPIO_Config_t *GPIO_Config)
 		GPIO_Config->GPIO_Port->MODER &= ~(GPIO_Mode_Reset << (pin * 2));
 		GPIO_Config->GPIO_Port->MODER |= ((GPIO_Config->GPIO_MODE) << (pin * 2));
 
+		if(GPIO_Config->GPIO_MODE == GPIO_AF)
+		{
+			GPIO_AlternateFunctionConfig(GPIO_Config, alt_function);
+		}
+
 		GPIO_Config->GPIO_Port->OTYPER &= ~(GPIO_OType_Reset << pin);
 		GPIO_Config->GPIO_Port->OTYPER |= ((GPIO_Config->GPIO_OTYPE) << pin);
 
@@ -233,32 +264,6 @@ void GPIO_Init(GPIO_Config_t *GPIO_Config)
 		GPIO_Config->GPIO_Port->PUPDR |= ((GPIO_Config->GPIO_PUPD) << (pin * 2));
 	}
 
-}
-
-/*
- * @brief	This function allows the user to set a specific GPIO pin in alternate function mode.
- *
- * @note	See the data-sheet for what each AF value is associated with for each port.
- *
- * @param	GPIO_Config: GPIO_Config: pointer to the GPIO_Config_t data structure that contains the
- * 			configuration parameters for the specific GPIO pin.
- *
- * @param	alt_function: This will take in the alternate function value that the user wishes to use.
- * 			The specific alternate function values and their functions are present in the data sheet.
- * 			The inputs for this function are AF0 - AF15;
- */
-void GPIO_AlternateFunctionConfig(GPIO_Config_t *GPIO_Config, AFR_Config_t alt_function)
-{
-	uint8_t pin = GPIO_Config->GPIO_Pin;
-	uint8_t alt_function_array = pin/8;
-
-	if(alt_function_array == 1)
-	{
-		pin -= 8;
-	}
-
-	GPIO_Config->GPIO_Port->AFR[alt_function_array] &= ~(AF15 << (pin * 4));
-	GPIO_Config->GPIO_Port->AFR[alt_function_array] |= (alt_function << (pin * 4));
 }
 
 /*
@@ -375,7 +380,7 @@ void GPIO_ConfigLEDPA5(uint8_t State)
 {
 	GPIO_Config_t PortAPin5_LED;
 	GPIO_Config(&PortAPin5_LED, GPIOA, Pin5, GPIO_Output, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
-	GPIO_Init(&PortAPin5_LED);
+	GPIO_Init(&PortAPin5_LED, 0);
 
 	GPIO_WritePin(&PortAPin5_LED, State);
 }
@@ -397,7 +402,7 @@ uint8_t GPIO_ConfigButtonPC13(void)
 {
 	GPIO_Config_t PortCPin13_PushButton;
 	GPIO_Config(&PortCPin13_PushButton, GPIOC, Pin13, GPIO_Input, 0x0, 0x0, GPIO_PullDown);
-	GPIO_Init(&PortCPin13_PushButton);
+	GPIO_Init(&PortCPin13_PushButton, 0);
 	return GPIO_ReadPin(&PortCPin13_PushButton);
 }
 

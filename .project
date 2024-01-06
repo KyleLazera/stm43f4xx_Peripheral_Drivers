@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>UART_Driver</name>
+	<name>I2C_Driver</name>
 	<comment></comment>
 	<projects>
 	</projects>

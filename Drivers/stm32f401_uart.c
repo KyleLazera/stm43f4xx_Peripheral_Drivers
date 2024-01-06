@@ -78,13 +78,10 @@ void Select_UART_Periph(GPIO_TypeDef *GPIOx, uint8_t pin, AFR_Config_t alt_funct
 	GPIO_Config_t GPIOx_UARTx_Tx, GPIOx_UARTx_Rx;
 
 	GPIO_Config(&GPIOx_UARTx_Tx, GPIOx, pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
-	GPIO_Init(&GPIOx_UARTx_Tx);
-	GPIO_AlternateFunctionConfig(&GPIOx_UARTx_Tx, alt_function);
+	GPIO_Init(&GPIOx_UARTx_Tx, alt_function);
 
 	GPIO_Config(&GPIOx_UARTx_Rx, GPIOx, (pin + 1), GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
-	GPIO_Init(&GPIOx_UARTx_Rx);
-	GPIO_AlternateFunctionConfig(&GPIOx_UARTx_Rx, alt_function);
-
+	GPIO_Init(&GPIOx_UARTx_Rx, alt_function);
 }
 
 /*

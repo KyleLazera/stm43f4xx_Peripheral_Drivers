@@ -1,4 +1,5 @@
-Src/main.o: ../Src/main.c ../Inc/stm32f401_i2c.h \
+Drivers/stm32f401_i2c.o: ../Drivers/stm32f401_i2c.c \
+ ../Inc/stm32f401_i2c.h \
  C:/Users/klaze/Documents/Chip\ Headers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h \
  C:/Users/klaze/Documents/Chip\ Headers/CMSIS/Device/ST/STM32F4xx/Include/stm32f401xe.h \
  C:/Users/klaze/Documents/Chip\ Headers/CMSIS/Include/core_cm4.h \
