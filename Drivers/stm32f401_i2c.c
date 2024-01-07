@@ -46,10 +46,12 @@ static void Generate_Stop_Condition(I2C_Handle_t *I2C_Handle)
 /*
  * @brief	A helper function used to send the slave address with either a read or write in the LSB
  */
-static void Send_Slave_Address(I2C_Handle_t *I2C_Handle, uint8_t slave_address, uint8_t read_or_write)
+static void Send_Slave_Address(I2C_Handle_t *I2C_Handle)
 {
+	uint8_t slave_address = I2C_Handle->slave_address;
+
 	//Determine whether read or write mode is active first
-	if(read_or_write == I2C_Read)
+	if(I2C_Handle->I2C_Bus_Direction == I2C_Recieve)
 	{
 		//If the user wishes to read data, append a 1 to the end of the address
 		slave_address = ((slave_address << 1) | (I2C_Read << 0U));
@@ -72,9 +74,24 @@ static void Clear_Addr_Flag(I2C_Handle_t *I2C_Handle)
 {
 	uint32_t temporary_variable = 0;
 
-	//Clear the addr flag
-	temporary_variable = I2C_Handle->I2Cx->SR1;
-	temporary_variable = I2C_Handle->I2Cx->SR2;
+	if((I2C_Handle->I2C_Bus_Direction == I2C_Recieve) && (I2C_Handle->Rx_Length == 1))
+	{
+		//Disable the Ack
+		I2C_Handle->I2Cx->CR1 &= ~(CR1_ACK_Enable);
+
+		//Clear addr flag
+		temporary_variable = I2C_Handle->I2Cx->SR1;
+		temporary_variable = I2C_Handle->I2Cx->SR2;
+
+	}
+
+	else
+	{
+		//Clear the addr flag
+		temporary_variable = I2C_Handle->I2Cx->SR1;
+		temporary_variable = I2C_Handle->I2Cx->SR2;
+	}
+
 
 }
 
@@ -217,6 +234,8 @@ void I2C_Init(I2C_Handle_t *I2C_Handle)
  */
 void I2C_MasterTransmit(I2C_Handle_t *I2C_Handle, uint8_t *TxData, uint8_t slave_address, uint8_t number_of_bytes, uint8_t restart_condition)
 {
+	I2C_Handle->I2C_Bus_Direction = I2C_Transmit;
+	I2C_Handle->slave_address = slave_address;
 
 	//Enable the ACK bit
 	I2C_Handle->I2Cx->CR1 |= CR1_ACK_Enable;
@@ -227,7 +246,7 @@ void I2C_MasterTransmit(I2C_Handle_t *I2C_Handle, uint8_t *TxData, uint8_t slave
 	while(!(Check_Flag(I2C_Handle, SR1_SB_Flag)));
 
 	//Send slave address
-	Send_Slave_Address(I2C_Handle, slave_address, I2C_Write);
+	Send_Slave_Address(I2C_Handle);
 	//Ensure the addr flag has been set indicating the end of address transmission
 	while(!(Check_Flag(I2C_Handle, SR1_ADDR_Flag)));
 
@@ -259,25 +278,22 @@ void I2C_MasterTransmit(I2C_Handle_t *I2C_Handle, uint8_t *TxData, uint8_t slave
 
 void I2C_MasterRecieve(I2C_Handle_t *I2C_Handle, uint8_t *RxData, uint8_t slave_address, uint8_t number_of_bytes, uint8_t restart_condition)
 {
+	I2C_Handle->I2C_Bus_Direction = I2C_Recieve;
+	I2C_Handle->slave_address = slave_address;
+	I2C_Handle->Rx_Length = number_of_bytes;
+
 	//Generate start condition and ensure the SB flag is raised
 	Generate_Start_Condition(I2C_Handle);
 	while(!(Check_Flag(I2C_Handle, SR1_SB_Flag)));
-	//PrintData(UART_Handle, "Start Bit Generated\n\r");
 
 	//Send slave address with read as the LSB and ensure the addr flag is raised
-	Send_Slave_Address(I2C_Handle, slave_address, I2C_Read);
+	Send_Slave_Address(I2C_Handle);
 	while(!(Check_Flag(I2C_Handle, SR1_ADDR_Flag)));
-	//PrintData(UART_Handle, "Address flag raised.\n\r");
+
+	Clear_Addr_Flag(I2C_Handle);
 
 	if(number_of_bytes == 1)
 	{
-		//PrintData(UART_Handle, "number of bytes = 1.\n\r");
-
-		I2C_Handle->I2Cx->CR1 &= ~(CR1_ACK_Enable);
-		//PrintData(UART_Handle, "ACK disabled.\n\r");
-
-		Clear_Addr_Flag(I2C_Handle);
-		//PrintData(UART_Handle, "Address flag cleared.\n\r");
 
 		while(!(Check_Flag(I2C_Handle, SR1_RXNE_Flag)));
 
@@ -285,7 +301,6 @@ void I2C_MasterRecieve(I2C_Handle_t *I2C_Handle, uint8_t *RxData, uint8_t slave_
 		{
 			//Generate stop condition
 			Generate_Stop_Condition(I2C_Handle);
-			//PrintData(UART_Handle, "Stop Condition Generated.\n\r");
 		}
 
 		*RxData = I2C_Handle->I2Cx->DR;
@@ -293,12 +308,9 @@ void I2C_MasterRecieve(I2C_Handle_t *I2C_Handle, uint8_t *RxData, uint8_t slave_
 
 	if(number_of_bytes > 1)
 	{
-		Clear_Addr_Flag(I2C_Handle);
-		//PrintData(UART_Handle, "Address flag cleared.\n\r");
 
 		while(number_of_bytes > 0)
 		{
-			//PrintData(UART_Handle, "Number of bytes > 0. \n\r");
 
 			while(!(Check_Flag(I2C_Handle, SR1_RXNE_Flag)));
 
@@ -307,13 +319,11 @@ void I2C_MasterRecieve(I2C_Handle_t *I2C_Handle, uint8_t *RxData, uint8_t slave_
 			if(number_of_bytes == 2)
 			{
 				I2C_Handle->I2Cx->CR1 &= ~(CR1_ACK_Enable);
-				//PrintData(UART_Handle, "ACK disabled.\n\r");
 
 				if(restart_condition == I2C_No_Restart)
 				{
 					//Generate stop condition
 					Generate_Stop_Condition(I2C_Handle);
-					//PrintData(UART_Handle, "Stop Condition Generated.\n\r");
 				}
 			}
 
