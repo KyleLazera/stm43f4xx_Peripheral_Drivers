@@ -130,7 +130,7 @@ void I2C_Init(I2C_Handle_t *I2C_Handle);
 void I2C_DeInit(I2C_Handle_t *I2C_Handle);
 void I2C_Config(I2C_Handle_t *I2C_Handle, I2C_TypeDef *I2Cx, uint32_t scl_speed, uint8_t duty_cycle, uint8_t pin_scl, uint8_t pin_sda);
 void I2C_MasterTransmit(I2C_Handle_t *I2C_Handle, uint8_t *RxData, uint8_t slave_address, uint8_t number_of_bytes, uint8_t restart_condition);
-void I2C_MasterRecieve(I2C_Handle_t *I2C_Handle, uint8_t *RxData, uint8_t slave_address, uint8_t number_of_bytes, uint8_t restart_condition, UART_Config_t *UART_Handle);
+void I2C_MasterRecieve(I2C_Handle_t *I2C_Handle, uint8_t *RxData, uint8_t slave_address, uint8_t number_of_bytes, uint8_t restart_condition);
 void I2C_MasterTransmitIT(I2C_Handle_t *I2C_Handle, uint8_t *TxData, uint8_t slave_address, uint8_t number_of_bytes, uint8_t restart_condition);
 void I2C_MasterRecieveIT(I2C_Handle_t *I2C_Handle, uint8_t *TxData, uint8_t slave_address, uint8_t number_of_bytes, uint8_t restart_condition);
 void IRQ_Event_Handler(I2C_Handle_t *I2C_Handle, UART_Config_t *UART_Handle);
