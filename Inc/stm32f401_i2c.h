@@ -20,6 +20,7 @@ typedef struct
 	I2C_TypeDef *I2Cx;
 	uint8_t Tx_Length;
 	uint8_t Rx_Length;
+	uint8_t Rx_Size;
 	uint8_t *Tx_Buffer;
 	uint8_t *Rx_Buffer;
 	uint8_t slave_address;
@@ -35,9 +36,9 @@ typedef enum
 
 typedef enum
 {
-	I2C_Recieve = 0U,
+	I2C_Ready = 0U,
 	I2C_Transmit = 1U,
-	I2C_Ready = 2U
+	I2C_Recieve = 2U
 }I2C_Bus;
 
 /*

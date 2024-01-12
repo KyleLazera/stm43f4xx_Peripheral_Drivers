@@ -270,12 +270,16 @@ void I2C_MasterTransmit(I2C_Handle_t *I2C_Handle, uint8_t *TxData, uint8_t slave
 	if(restart_condition == I2C_No_Restart)
 	{
 		Generate_Stop_Condition(I2C_Handle);
+		I2C_Handle->I2C_Bus_Direction = I2C_Ready;
 	}
 
 
 
 }
 
+/*
+ * @brief
+ */
 void I2C_MasterRecieve(I2C_Handle_t *I2C_Handle, uint8_t *RxData, uint8_t slave_address, uint8_t number_of_bytes, uint8_t restart_condition)
 {
 	I2C_Handle->I2C_Bus_Direction = I2C_Recieve;
@@ -301,6 +305,7 @@ void I2C_MasterRecieve(I2C_Handle_t *I2C_Handle, uint8_t *RxData, uint8_t slave_
 		{
 			//Generate stop condition
 			Generate_Stop_Condition(I2C_Handle);
+			I2C_Handle->I2C_Bus_Direction = I2C_Ready;
 		}
 
 		*RxData = I2C_Handle->I2Cx->DR;
@@ -324,6 +329,7 @@ void I2C_MasterRecieve(I2C_Handle_t *I2C_Handle, uint8_t *RxData, uint8_t slave_
 				{
 					//Generate stop condition
 					Generate_Stop_Condition(I2C_Handle);
+					I2C_Handle->I2C_Bus_Direction = I2C_Ready;
 				}
 			}
 
@@ -362,6 +368,19 @@ static void Enable_Interrupt_Handler(I2C_TypeDef *I2Cx)
 	}
 }
 
+static void I2C_EndDataTransmission(I2C_Handle_t *I2C_Handle)
+{
+	//Disable the two interrupt enable bits
+	I2C_Handle->I2Cx->CR2 &= ~CR2_ITBUFEN;
+	I2C_Handle->I2Cx->CR2 &= ~CR2_ITEVTEN;
+
+	//Clear the I2C handle
+	I2C_Handle->I2C_Bus_Direction = I2C_Ready;
+
+	//Enable the ACK
+	I2C_Handle->I2Cx->CR1 |= CR1_ACK_Enable;
+}
+
 static void MasterTransmit_TxEInterrupt(I2C_Handle_t *I2C_Handle, UART_Config_t *UART_Handle)
 {
 	PrintData(UART_Handle, "Transmitting data.\n\r");
@@ -380,56 +399,61 @@ static void MasterTransmit_TxEInterrupt(I2C_Handle_t *I2C_Handle, UART_Config_t 
 	}
 }
 
-static void MasterRecieve_RXNEInterrupt(I2C_Handle_t *I2C_Handle)
+static void MasterRecieve_RXNEInterrupt(I2C_Handle_t *I2C_Handle, UART_Config_t *UART_Handle)
 {
-	if(I2C_Handle->Rx_Length == 1)
+
+
+	if(I2C_Handle->Rx_Size == 1)
 	{
+		PrintData(UART_Handle, "Rx length = 1.\n\r");
+
+		Generate_Stop_Condition(I2C_Handle);
+		PrintData(UART_Handle, "Stop Condition generated.\n\r");
+
 		//Ack bit needs to be disabled before clearing the address flag - this is handled by the clear address flag function
 		*(I2C_Handle->Rx_Buffer) = I2C_Handle->I2Cx->DR;
 
-		I2C_Handle->Rx_Length--;
+		PrintData(UART_Handle, "Closing Data Transmission.\n\r");
+		I2C_EndDataTransmission(I2C_Handle);
 	}
 
-	else if(I2C_Handle->Rx_Length > 1)
+	else if(I2C_Handle->Rx_Size > 1)
 	{
+		PrintData(UART_Handle, "RX length > 1.\n\r");
+
 		//Check if there are 2 bytes of data to be recieved
-		if(I2C_Handle->Rx_Length == 2)
+		//This would be when Rx Length = 3 because we don't consider the 0 bit
+		if(I2C_Handle->Rx_Length == 3)
 		{
+			PrintData(UART_Handle, "RX length = 2.\n\r");
+
 			//Disbale the Ack
 			I2C_Handle->I2Cx->CR1 &= ~(CR1_ACK_Enable);
-		}
 
-		//Read data from DR
-		*(I2C_Handle->Rx_Buffer) = I2C_Handle->I2Cx->DR;
+		}
 
 		//Decrement the length of the buffer
 		I2C_Handle->Rx_Length--;
 
 		//Increment the address of the buffer
 		I2C_Handle->Rx_Buffer++;
-	}
 
-	if(I2C_Handle->Rx_Length == 0)
-	{
-		//Check for restart condition
-		if(I2C_Handle->restart_condition == I2C_No_Restart)
+		//If it is the last byte of data to be recieved
+		if(I2C_Handle->Rx_Length == 1)
 		{
 			//Generate stop condition
 			Generate_Stop_Condition(I2C_Handle);
+			PrintData(UART_Handle, "Stop Condition generated.\n\r");
+
+			PrintData(UART_Handle, "Closing Data Transmission.\n\r");
+			I2C_EndDataTransmission(I2C_Handle);
 		}
+
+		//Read data from DR
+		*(I2C_Handle->Rx_Buffer) = I2C_Handle->I2Cx->DR;
+
 	}
 
-
-}
-
-static void I2C_EndDataTransmission(I2C_Handle_t *I2C_Handle)
-{
-	//Disable the two interrupt enable bits
-	I2C_Handle->I2Cx->CR2 &= ~CR2_ITBUFEN;
-	I2C_Handle->I2Cx->CR2 &= ~CR2_ITEVTEN;
-
-	//Clear the I2C handle
-	I2C_Handle->I2C_Bus_Direction = I2C_Ready;
 }
 
 /*
@@ -462,7 +486,7 @@ void I2C_MasterTransmitIT(I2C_Handle_t *I2C_Handle, uint8_t *TxData, uint8_t sla
 /*
  * @brief
  */
-void I2C_MasterRecieveIT(I2C_Handle_t *I2C_Handle, uint8_t *TxData, uint8_t slave_address, uint8_t number_of_bytes, uint8_t restart_condition)
+void I2C_MasterRecieveIT(I2C_Handle_t *I2C_Handle, uint8_t *RxData, uint8_t slave_address, uint8_t number_of_bytes, uint8_t restart_condition)
 {
 	//Enable interrupts for the secified I2C peripheral
 	Enable_Interrupt_Handler(I2C_Handle->I2Cx);
@@ -471,8 +495,9 @@ void I2C_MasterRecieveIT(I2C_Handle_t *I2C_Handle, uint8_t *TxData, uint8_t slav
 	if(((I2C_Handle->I2C_Bus_Direction)!= I2C_Transmit) && ((I2C_Handle->I2C_Bus_Direction)!= I2C_Recieve))
 	{
 		I2C_Handle->slave_address = slave_address;
-		I2C_Handle->Tx_Length = number_of_bytes;
-		I2C_Handle->Tx_Buffer = TxData;
+		I2C_Handle->Rx_Length = number_of_bytes;
+		I2C_Handle->Rx_Size = number_of_bytes;
+		I2C_Handle->Rx_Buffer = RxData;
 		I2C_Handle->restart_condition = restart_condition;
 		I2C_Handle->I2C_Bus_Direction = I2C_Recieve;
 
@@ -480,6 +505,9 @@ void I2C_MasterRecieveIT(I2C_Handle_t *I2C_Handle, uint8_t *TxData, uint8_t slav
 		I2C_Handle->I2Cx->CR2 |= CR2_ITBUFEN;
 		I2C_Handle->I2Cx->CR2 |= CR2_ITEVTEN;
 		I2C_Handle->I2Cx->CR2 |= CR2_ITERREN;
+
+		//Enable the ACK bit
+		I2C_Handle->I2Cx->CR1 |= CR1_ACK_Enable;
 
 		//Generate the start condition to start the I2C bus transfer
 		Generate_Start_Condition(I2C_Handle);
@@ -493,7 +521,7 @@ void IRQ_Event_Handler(I2C_Handle_t *I2C_Handle, UART_Config_t *UART_Handle)
 {
 	//Used to check status of registers
 	uint8_t evt_interrupt, buff_interrupt, sr_flag;
-	PrintData(UART_Handle, "Inside event handler.\n\r");
+	PrintData(UART_Handle, "Interrupt Generated.\n\r");
 
 	//Used to ensure the interrupt enable bits are set
 	evt_interrupt = (I2C_Handle->I2Cx->CR2 & CR2_ITEVTEN) >> 9;
@@ -504,7 +532,8 @@ void IRQ_Event_Handler(I2C_Handle_t *I2C_Handle, UART_Config_t *UART_Handle)
 
 	if(evt_interrupt && sr_flag)
 	{
-		//Send_Slave_Address(I2C_Handle);
+		PrintData(UART_Handle, "SB bit raised.\n\r");
+		Send_Slave_Address(I2C_Handle);
 		PrintData(UART_Handle, "Slave address sent.\n\r");
 	}
 
@@ -513,6 +542,7 @@ void IRQ_Event_Handler(I2C_Handle_t *I2C_Handle, UART_Config_t *UART_Handle)
 
 	if(evt_interrupt && sr_flag)
 	{
+		PrintData(UART_Handle, "ADDR flag raised.\n\r");
 		Clear_Addr_Flag(I2C_Handle);
 		PrintData(UART_Handle, "Address flag cleared.\n\r");
 	}
@@ -524,10 +554,10 @@ void IRQ_Event_Handler(I2C_Handle_t *I2C_Handle, UART_Config_t *UART_Handle)
 
 	if(evt_interrupt && sr_flag)
 	{
-		PrintData(UART_Handle, "BTF flag set.\n\r");
 		//Check if I2C peripheral is in transmission mode and TxE flag is set - inidcates both BTF and TxE flags are set
 		if((I2C_Handle->I2C_Bus_Direction == I2C_Transmit) && ((I2C_Handle->I2Cx->SR1 & SR1_TXE_Flag)>>7))
 		{
+			PrintData(UART_Handle, "BTF flag set in transmission.\n\r");
 			if(I2C_Handle->Tx_Length ==0)
 			{
 				if((I2C_Handle->restart_condition == I2C_No_Restart))
@@ -537,11 +567,13 @@ void IRQ_Event_Handler(I2C_Handle_t *I2C_Handle, UART_Config_t *UART_Handle)
 					PrintData(UART_Handle, "Stop condition generated.\n\r");
 				}
 
-				else
-					PrintData(UART_Handle, "Closing Data Transmission.\n\r");
-					I2C_EndDataTransmission(I2C_Handle);
+				PrintData(UART_Handle, "Closing Data Transmission.\n\r");
+				I2C_EndDataTransmission(I2C_Handle);
 			}
 		}
+
+		PrintData(UART_Handle, "BTF flag set.\n\r");
+
 	}
 
 	//3) TxE flag is set indicating the data register is empty (in transmission)
@@ -550,6 +582,7 @@ void IRQ_Event_Handler(I2C_Handle_t *I2C_Handle, UART_Config_t *UART_Handle)
 
 	if(evt_interrupt && buff_interrupt && sr_flag)
 	{
+		PrintData(UART_Handle, "Txe Flag Raised.\n\r");
 		MasterTransmit_TxEInterrupt(I2C_Handle, UART_Handle);
 		PrintData(UART_Handle, "Txe Flag Cleared.\n\r");
 	}
@@ -559,7 +592,8 @@ void IRQ_Event_Handler(I2C_Handle_t *I2C_Handle, UART_Config_t *UART_Handle)
 
 	if(evt_interrupt && buff_interrupt && sr_flag)
 	{
-		MasterRecieve_RXNEInterrupt(I2C_Handle);
+		PrintData(UART_Handle, "RxNE Flag raised.\n\r");
+		MasterRecieve_RXNEInterrupt(I2C_Handle, UART_Handle);
 		PrintData(UART_Handle, "RxNE Flag cleared.\n\r");
 	}
 
