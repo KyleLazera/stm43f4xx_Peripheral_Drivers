@@ -1,5 +1,20 @@
 #include "stm32f401_i2c.h"
 
+/*
+ * This is a simple I2C driver with the main purpose of stream-lining initilization and transmission/reception from the stm32f4xx MCU.
+ * The program allows the user to configure the I2C settings such as the SCL speed, the duty cycle and which pins to use. Additionally, the
+ * user can initialize the I2C with these settings and then transmit and recieve data to and from slave devices. This program also gives the
+ * user the option of blocking/not-blocking the CPU during I2C communication, with the inclusion of an interrupt initialization and event handler
+ * function.
+ *
+ * The functions within this driver give the user the ability to:
+ * 		1) Configure and initialize the specified I2C peripheral with the desired settings (clock speed, duty cycle etc.).
+ * 		2) Transmit single or multiple bytes of data to from the MCU to the slave device with or without blocking CPU.
+ * 		3) Recieve single or multiple bytes of data from the slave device with or without blocking the CPU.
+ *
+ *  Designed by: Kyle Lazera
+ */
+
 
 /*Helper Functions*/
 static void Enable_I2C_Periph(GPIO_TypeDef *GPIOx, uint8_t pin, AFR_Config_t alt_function);
