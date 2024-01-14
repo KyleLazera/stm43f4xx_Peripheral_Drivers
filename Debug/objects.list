@@ -3,6 +3,7 @@
 "./Drivers/stm32f401_rcc.o"
 "./Drivers/stm32f401_uart.o"
 "./Src/I2C_Example.o"
+"./Src/I2C_Example_Interrupt.o"
 "./Src/syscalls.o"
 "./Src/sysmem.o"
 "./Startup/startup_stm32f401retx.o"

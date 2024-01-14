@@ -98,6 +98,21 @@ typedef enum
 #define SR1_RXNE_Flag						(0x1UL << SR1_RXNE_Pos)
 #define SR1_TXE_Pos							(7U)
 #define SR1_TXE_Flag						(0x1UL << SR1_TXE_Pos)
+#define SR1_BERR_Pos						(8U)
+#define SR1_BERR_Flag						(0x1UL << SR1_BERR_Pos)
+#define SR1_ARLO_Pos						(9U)
+#define SR1_ARLO_Flag						(0x1UL << SR1_ARLO_Pos)
+#define SR1_AF_Pos							(10)
+#define SR1_AF_Flag							(0x1UL << SR1_AF_Pos)
+#define SR1_OVR_Pos							(11)
+#define SR1_OVR_Flag						(0x1UL << SR1_OVR_Pos)
+#define SR1_PECERR_Pos						(12)
+#define SR1_PECERR_Flag						(0x1UL << SR1_PECERR_Pos)
+#define SR1_TIMEOUT_Pos						(14)
+#define SR1_TIMEOUT_Flag					(0x1UL << SR1_TIMEOUT_Pos)
+#define SR1_SMBALERT_Pos					(15)
+#define SR1_SMBALERT_Flag					(0x1UL << SR1_SMBALERT_Pos)
+
 
 /*
  * Status Register 2 Flags
@@ -116,25 +131,28 @@ typedef enum
 #define CCR_CCR_Pos							(0U)
 
 /*
- * RCC Reset/I2C De-Init
+ * I2C De-Init
  */
-#define I2C1RST_Pos							(21U)
-#define I2C1RST								(0x1UL << I2C1RST_Pos)
-#define I2C2RST_Pos							(22U)
-#define I2C2RST								(0x1UL << I2C2RST_Pos)
-#define I2C3RST_Pos							(23U)
-#define I2C3RST								(0x1UL << I2C3RST_Pos)
+#define I2C1EN_Pos							(21U)
+#define I2C1EN								(0x1UL << I2C1EN_Pos)
+#define I2C2EN_Pos							(22U)
+#define I2C2EN								(0x1UL << I2C2EN_Pos)
+#define I2C3EN_Pos							(23U)
+#define I2C3EN								(0x1UL << I2C3EN_Pos)
 
-
+/*
+ * Functions
+ */
 
 void I2C_Init(I2C_Handle_t *I2C_Handle);
 void I2C_DeInit(I2C_Handle_t *I2C_Handle);
 void I2C_Config(I2C_Handle_t *I2C_Handle, I2C_TypeDef *I2Cx, uint32_t scl_speed, uint8_t duty_cycle, uint8_t pin_scl, uint8_t pin_sda);
 void I2C_MasterTransmit(I2C_Handle_t *I2C_Handle, uint8_t *RxData, uint8_t slave_address, uint8_t number_of_bytes, uint8_t restart_condition);
 void I2C_MasterRecieve(I2C_Handle_t *I2C_Handle, uint8_t *RxData, uint8_t slave_address, uint8_t number_of_bytes, uint8_t restart_condition);
-void I2C_MasterTransmitIT(I2C_Handle_t *I2C_Handle, uint8_t *TxData, uint8_t slave_address, uint8_t number_of_bytes, uint8_t restart_condition);
-void I2C_MasterRecieveIT(I2C_Handle_t *I2C_Handle, uint8_t *TxData, uint8_t slave_address, uint8_t number_of_bytes, uint8_t restart_condition);
-void IRQ_Event_Handler(I2C_Handle_t *I2C_Handle, UART_Config_t *UART_Handle);
+void I2C_MasterTransmitIT(I2C_Handle_t *I2C_Handle, uint8_t *TxData, uint8_t slave_address, uint8_t number_of_bytes);
+void I2C_MasterRecieveIT(I2C_Handle_t *I2C_Handle, uint8_t *TxData, uint8_t slave_address, uint8_t number_of_bytes);
+void IRQ_Event_Handler(I2C_Handle_t *I2C_Handle);
+void IRQ_Error_Handler(I2C_Handle_t *I2C_Handle, UART_Config_t *UART_Handle);
 
 
 #endif /* STM32F401_I2C_H_ */
