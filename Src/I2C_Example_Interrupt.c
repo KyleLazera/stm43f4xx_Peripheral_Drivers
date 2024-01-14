@@ -1,8 +1,8 @@
 #include "stm32f401_i2c.h"
 
 /*
- * This function was tested on the DS1307 Real time clock module. This is not a driver for this module,
- * but rather is a very simplistic program meant to test the I2C driver by transmitting data to the
+ * The I2C driver was tested on the DS1307 Real time clock module. This example file is not a driver for the module,
+ * but rather, a very simplistic program meant to test the I2C driver by transmitting data to the
  * module and then reading it and placing it into an empty array.
  *
  * This specific example uses non-blocking commmunication, which allows the CPU to continue processsing data while
@@ -21,6 +21,7 @@ void delay(int time_delay);
 
 int main()
 {
+
 	//This data represents: 06:47:00 AM on 01/14/2023 with the clock kept in 24 hour mode
 	uint8_t output_data[8] = {0x00, 0, 71, 6, 7, 20, 1, 35};
 	uint8_t output_register_address[1] = {0x00};

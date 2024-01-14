@@ -1,6 +1,6 @@
 /*
- * This function was tested on the DS1307 Real time clock module. This is not a driver for this module,
- * but rather is a very simplistic program meant to test the I2C driver by transmitting data to the
+ * The I2C driver was tested on the DS1307 Real time clock module. This example file is not a driver for the module,
+ * but rather, a very simplistic program meant to test the I2C driver by transmitting data to the
  * module and then reading it and placing it into an empty array.
  *
  * This specific example uses blocking commmunication, which blocks the CPU from running other programs while
