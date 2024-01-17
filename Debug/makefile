@@ -34,34 +34,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := I2C_Driver
+BUILD_ARTIFACT_NAME := SPI_Driver
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-I2C_Driver.elf \
+SPI_Driver.elf \
 
 MAP_FILES += \
-I2C_Driver.map \
+SPI_Driver.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-I2C_Driver.list \
+SPI_Driver.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: I2C_Driver.elf secondary-outputs
+main-build: SPI_Driver.elf secondary-outputs
 
 # Tool invocations
-I2C_Driver.elf I2C_Driver.map: $(OBJS) $(USER_OBJS) C:\Users\klaze\STM32CubeIDE\I2C_Driver\STM32F401RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "I2C_Driver.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\klaze\STM32CubeIDE\I2C_Driver\STM32F401RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="I2C_Driver.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+SPI_Driver.elf SPI_Driver.map: $(OBJS) $(USER_OBJS) C:\Users\klaze\STM32CubeIDE\SPI_Driver\STM32F401RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "SPI_Driver.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\klaze\STM32CubeIDE\SPI_Driver\STM32F401RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="SPI_Driver.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -70,14 +70,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-I2C_Driver.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "I2C_Driver.list"
+SPI_Driver.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "SPI_Driver.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) I2C_Driver.elf I2C_Driver.list I2C_Driver.map default.size.stdout
+	-$(RM) SPI_Driver.elf SPI_Driver.list SPI_Driver.map default.size.stdout
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)

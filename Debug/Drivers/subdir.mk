@@ -8,18 +8,21 @@ C_SRCS += \
 ../Drivers/stm32f401_gpio.c \
 ../Drivers/stm32f401_i2c.c \
 ../Drivers/stm32f401_rcc.c \
+../Drivers/stm32f401_spi.c \
 ../Drivers/stm32f401_uart.c 
 
 OBJS += \
 ./Drivers/stm32f401_gpio.o \
 ./Drivers/stm32f401_i2c.o \
 ./Drivers/stm32f401_rcc.o \
+./Drivers/stm32f401_spi.o \
 ./Drivers/stm32f401_uart.o 
 
 C_DEPS += \
 ./Drivers/stm32f401_gpio.d \
 ./Drivers/stm32f401_i2c.d \
 ./Drivers/stm32f401_rcc.d \
+./Drivers/stm32f401_spi.d \
 ./Drivers/stm32f401_uart.d 
 
 
@@ -30,7 +33,7 @@ Drivers/%.o Drivers/%.su Drivers/%.cyclo: ../Drivers/%.c Drivers/subdir.mk
 clean: clean-Drivers
 
 clean-Drivers:
-	-$(RM) ./Drivers/stm32f401_gpio.cyclo ./Drivers/stm32f401_gpio.d ./Drivers/stm32f401_gpio.o ./Drivers/stm32f401_gpio.su ./Drivers/stm32f401_i2c.cyclo ./Drivers/stm32f401_i2c.d ./Drivers/stm32f401_i2c.o ./Drivers/stm32f401_i2c.su ./Drivers/stm32f401_rcc.cyclo ./Drivers/stm32f401_rcc.d ./Drivers/stm32f401_rcc.o ./Drivers/stm32f401_rcc.su ./Drivers/stm32f401_uart.cyclo ./Drivers/stm32f401_uart.d ./Drivers/stm32f401_uart.o ./Drivers/stm32f401_uart.su
+	-$(RM) ./Drivers/stm32f401_gpio.cyclo ./Drivers/stm32f401_gpio.d ./Drivers/stm32f401_gpio.o ./Drivers/stm32f401_gpio.su ./Drivers/stm32f401_i2c.cyclo ./Drivers/stm32f401_i2c.d ./Drivers/stm32f401_i2c.o ./Drivers/stm32f401_i2c.su ./Drivers/stm32f401_rcc.cyclo ./Drivers/stm32f401_rcc.d ./Drivers/stm32f401_rcc.o ./Drivers/stm32f401_rcc.su ./Drivers/stm32f401_spi.cyclo ./Drivers/stm32f401_spi.d ./Drivers/stm32f401_spi.o ./Drivers/stm32f401_spi.su ./Drivers/stm32f401_uart.cyclo ./Drivers/stm32f401_uart.d ./Drivers/stm32f401_uart.o ./Drivers/stm32f401_uart.su
 
 .PHONY: clean-Drivers
 
