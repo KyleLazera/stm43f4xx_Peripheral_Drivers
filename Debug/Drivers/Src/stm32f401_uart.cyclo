@@ -1,0 +1,14 @@
+C:/Users/klaze/Documents/Chip Headers/CMSIS/Include/core_cm4.h:1688:22:__NVIC_EnableIRQ	2
+../Drivers/Src/stm32f401_uart.c:49:6:UART_Config	1
+../Drivers/Src/stm32f401_uart.c:76:6:Select_UART_Periph	1
+../Drivers/Src/stm32f401_uart.c:93:6:Enable_UART_Periph	3
+../Drivers/Src/stm32f401_uart.c:175:6:Set_BaudRate	3
+../Drivers/Src/stm32f401_uart.c:235:6:Set_WordLength	1
+../Drivers/Src/stm32f401_uart.c:256:6:Set_Parity	1
+../Drivers/Src/stm32f401_uart.c:276:6:Set_OverSampling	1
+../Drivers/Src/stm32f401_uart.c:298:6:Set_StopBits	1
+../Drivers/Src/stm32f401_uart.c:311:6:UART_Init	1
+../Drivers/Src/stm32f401_uart.c:361:6:WriteByte	7
+../Drivers/Src/stm32f401_uart.c:408:5:PrintData	2
+../Drivers/Src/stm32f401_uart.c:425:9:ReadByte	2
+../Drivers/Src/stm32f401_uart.c:449:6:UART_Interrupt_Init	4

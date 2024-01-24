@@ -49,6 +49,7 @@
 									<listOptionValue builtIn="false" value="&quot;C:\Users\klaze\Documents\Chip Headers\CMSIS\Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\Users\klaze\Documents\Chip Headers\STM32F4xx_DSP_StdPeriph_Lib_V1.9.0\Libraries\STM32F4xx_StdPeriph_Driver\inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\Users\klaze\Documents\Chip Headers\STM32F4xx_DSP_StdPeriph_Lib_V1.9.0\Libraries\STM32F4xx_StdPeriph_Driver\src&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Drivers/Inc}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.468049537" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
