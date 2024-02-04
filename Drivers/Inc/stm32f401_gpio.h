@@ -119,6 +119,7 @@ void GPIO_Init(GPIO_Config_t *GPIO_Config, AFR_Config_t alt_function);
 void GPIO_AlternateFunctionConfig(GPIO_Config_t *GPIO_Config, AFR_Config_t alt_function);
 void GPIO_PeriphClck(GPIO_TypeDef *GPIOx, FunctionalState state);
 void GPIO_WritePin(GPIO_Config_t *GPIO_Config, uint8_t State);
+void GPIO_WriteBit(GPIO_TypeDef *GPIOx, uint8_t pin, uint8_t EnorDis);
 void GPIO_WritePort(GPIO_Config_t *GPIO_Config, uint16_t word);
 uint8_t GPIO_ReadPin(GPIO_Config_t *GPIO_Config);
 uint16_t GPIO_ReadPort(GPIO_Config_t *GPIO_Config);

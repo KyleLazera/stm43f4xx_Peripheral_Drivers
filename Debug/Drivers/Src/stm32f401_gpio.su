@@ -4,9 +4,10 @@ C:/Users/klaze/Documents/Chip Headers/CMSIS/Include/core_cm4.h:1688:22:__NVIC_En
 ../Drivers/Src/stm32f401_gpio.c:171:6:GPIO_AlternateFunctionConfig	24	static
 ../Drivers/Src/stm32f401_gpio.c:210:6:GPIO_Init	24	static
 ../Drivers/Src/stm32f401_gpio.c:285:6:GPIO_WritePin	24	static
-../Drivers/Src/stm32f401_gpio.c:323:6:GPIO_WritePort	16	static
-../Drivers/Src/stm32f401_gpio.c:336:9:GPIO_ReadPin	24	static
-../Drivers/Src/stm32f401_gpio.c:354:10:GPIO_ReadPort	24	static
-../Drivers/Src/stm32f401_gpio.c:379:6:GPIO_ConfigLEDPA5	48	static
-../Drivers/Src/stm32f401_gpio.c:401:9:GPIO_ConfigButtonPC13	40	static
-../Drivers/Src/stm32f401_gpio.c:445:6:GPIO_EXTIConfig	24	static
+../Drivers/Src/stm32f401_gpio.c:309:6:GPIO_WriteBit	16	static
+../Drivers/Src/stm32f401_gpio.c:338:6:GPIO_WritePort	16	static
+../Drivers/Src/stm32f401_gpio.c:351:9:GPIO_ReadPin	24	static
+../Drivers/Src/stm32f401_gpio.c:369:10:GPIO_ReadPort	24	static
+../Drivers/Src/stm32f401_gpio.c:394:6:GPIO_ConfigLEDPA5	48	static
+../Drivers/Src/stm32f401_gpio.c:416:9:GPIO_ConfigButtonPC13	40	static
+../Drivers/Src/stm32f401_gpio.c:460:6:GPIO_EXTIConfig	24	static

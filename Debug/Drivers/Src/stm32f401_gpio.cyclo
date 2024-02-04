@@ -4,9 +4,10 @@ C:/Users/klaze/Documents/Chip Headers/CMSIS/Include/core_cm4.h:1688:22:__NVIC_En
 ../Drivers/Src/stm32f401_gpio.c:171:6:GPIO_AlternateFunctionConfig	2
 ../Drivers/Src/stm32f401_gpio.c:210:6:GPIO_Init	5
 ../Drivers/Src/stm32f401_gpio.c:285:6:GPIO_WritePin	4
-../Drivers/Src/stm32f401_gpio.c:323:6:GPIO_WritePort	1
-../Drivers/Src/stm32f401_gpio.c:336:9:GPIO_ReadPin	1
-../Drivers/Src/stm32f401_gpio.c:354:10:GPIO_ReadPort	1
-../Drivers/Src/stm32f401_gpio.c:379:6:GPIO_ConfigLEDPA5	1
-../Drivers/Src/stm32f401_gpio.c:401:9:GPIO_ConfigButtonPC13	1
-../Drivers/Src/stm32f401_gpio.c:445:6:GPIO_EXTIConfig	17
+../Drivers/Src/stm32f401_gpio.c:309:6:GPIO_WriteBit	2
+../Drivers/Src/stm32f401_gpio.c:338:6:GPIO_WritePort	1
+../Drivers/Src/stm32f401_gpio.c:351:9:GPIO_ReadPin	1
+../Drivers/Src/stm32f401_gpio.c:369:10:GPIO_ReadPort	1
+../Drivers/Src/stm32f401_gpio.c:394:6:GPIO_ConfigLEDPA5	1
+../Drivers/Src/stm32f401_gpio.c:416:9:GPIO_ConfigButtonPC13	1
+../Drivers/Src/stm32f401_gpio.c:460:6:GPIO_EXTIConfig	17

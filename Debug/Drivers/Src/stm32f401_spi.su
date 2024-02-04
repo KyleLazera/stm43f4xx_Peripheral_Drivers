@@ -1,3 +1,8 @@
-../Drivers/Src/stm32f401_spi.c:7:13:Config_SPI_Periph	48	static
-../Drivers/Src/stm32f401_spi.c:19:13:Enable_SPI_Periph	24	static
-../Drivers/Src/stm32f401_spi.c:186:6:SPI_Init	40	static
+../Drivers/Src/stm32f401_spi.c:8:20:Check_Flag	16	static
+../Drivers/Src/stm32f401_spi.c:21:13:Disable_SPI	16	static
+../Drivers/Src/stm32f401_spi.c:36:13:Config_SPI_Periph	48	static
+../Drivers/Src/stm32f401_spi.c:48:13:Enable_SPI_Periph	24	static
+../Drivers/Src/stm32f401_spi.c:219:6:SPI_Pin_Config	16	static
+../Drivers/Src/stm32f401_spi.c:247:6:SPI_Init	16	static
+../Drivers/Src/stm32f401_spi.c:288:6:SPI_Transmit	24	static
+../Drivers/Src/stm32f401_spi.c:308:6:SPI_Recieve	32	static

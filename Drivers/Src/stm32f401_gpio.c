@@ -304,6 +304,21 @@ void GPIO_WritePin(GPIO_Config_t *GPIO_Config, uint8_t State)
 }
 
 /*
+ * @brief	Simplified form of GPIO_WritePin, used to access a specific pin/port without creating a data structure
+ */
+void GPIO_WriteBit(GPIO_TypeDef *GPIOx, uint8_t pin, uint8_t EnorDis)
+{
+	if(EnorDis)
+	{
+		GPIOx->ODR |= (0x1UL << pin);
+	}
+	else
+	{
+		GPIOx->ODR &= ~(0x1UL << pin);
+	}
+}
+
+/*
  * @brief	Allows the user to write a 16 bit word to the output data register, and access
  * 			all the GPIO pins within the port.
  *

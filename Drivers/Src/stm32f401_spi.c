@@ -1,5 +1,34 @@
 #include "stm32f401_spi.h"
-#include <math.h>
+
+/*
+ * brief	A helper function that keeps track of specific flags in the status register.
+ *
+ * @retval	Returns status of the flag which is defined in an enumeration.
+ */
+static Flag_Status Check_Flag(SPI_Handle_t *SPI_Handle, uint32_t flag)
+{
+	if(SPI_Handle->SPIx->SR & flag)
+	{
+		return Flag_Set;
+	}
+
+	else
+	{
+		return Flag_Unset;
+	}
+}
+
+/*
+ * @brief	This is a helper function that disables the SPI peripheral after transferring data
+ */
+static void Disable_SPI(SPI_Handle_t *SPI_Handle)
+{
+		//Ensure the TXE is raised and BSY flag = 0
+		while(!(Check_Flag(SPI_Handle, SR_TXE_Flag)));
+		while(Check_Flag(SPI_Handle, SR_BSY_Flag));
+		//Disable the SPI peripheral
+		SPI_Handle->SPIx->CR1 &= ~CR1_SPE_Enable;
+}
 
 /*
  * @brief	Helper function used to enable the SPI GPIO pins
@@ -32,6 +61,7 @@ static void Enable_SPI_Periph(SPI_Handle_t *SPI_Handle)
 		{
 			//Init slave select pin
 			Config_SPI_Periph(GPIOA, nss_pin, AF5);
+			SPI_Handle->GPIOx = GPIOA;
 		}
 
 		//Init serial clock
@@ -78,6 +108,7 @@ static void Enable_SPI_Periph(SPI_Handle_t *SPI_Handle)
 		{
 			//Init slave select pin
 			Config_SPI_Periph(GPIOB, nss_pin, AF5);
+			SPI_Handle->GPIOx = GPIOB;
 		}
 
 		//Init serial clock pin
@@ -123,6 +154,7 @@ static void Enable_SPI_Periph(SPI_Handle_t *SPI_Handle)
 		{
 			//Init slave select pin
 			Config_SPI_Periph(GPIOA, nss_pin, AF6);
+			SPI_Handle->GPIOx = GPIOA;
 		}
 
 		//Init serial clock pin
@@ -170,6 +202,7 @@ static void Enable_SPI_Periph(SPI_Handle_t *SPI_Handle)
 		{
 			//Init slave select pin
 			Config_SPI_Periph(GPIOE, nss_pin, AF5);
+			SPI_Handle->GPIOx = GPIOE;
 		}
 		Config_SPI_Periph(GPIOE, sck_pin, AF5);
 		Config_SPI_Periph(GPIOE, miso_pin, AF5);
@@ -178,6 +211,17 @@ static void Enable_SPI_Periph(SPI_Handle_t *SPI_Handle)
 		//Enable Clock Access to SPI4
 		RCC_APB2Cmd(SPI4_Enable, ENABLE);
 	}
+}
+
+/*
+ * @brief	Configuration function that allows the user to specify the pins for the SPI
+ */
+void SPI_Pin_Config(SPI_Handle_t *SPI_Handle, uint8_t clock, uint8_t mosi, uint8_t miso, uint8_t nss)
+{
+	SPI_Handle->SPI_Config.pin_sck = clock;
+	SPI_Handle->SPI_Config.pin_mosi = mosi;
+	SPI_Handle->SPI_Config.pin_miso = miso;
+	SPI_Handle->SPI_Config.pin_nss = nss;
 }
 
 /*
@@ -202,11 +246,6 @@ static void Enable_SPI_Periph(SPI_Handle_t *SPI_Handle)
  */
 void SPI_Init(SPI_Handle_t *SPI_Handle)
 {
-	RCC_ClockFrequency_t ClockSource;
-
-	uint32_t clock_rate = 0;
-	//Used to keep track of the bit value to input into the CR1 register
-	uint8_t bit_value = 0;
 
 	//Enable specified pins and clock access to specified SPI
 	Enable_SPI_Periph(SPI_Handle);
@@ -228,33 +267,8 @@ void SPI_Init(SPI_Handle_t *SPI_Handle)
 		}
 	}
 
-	//Determine Peripheral Clock Speed
-	RCC_GetClockFreq(&ClockSource);
-
-	//Alorithm to determine the divisor based off the clock speed input by the user
-	while(clock_rate != SPI_Handle->SPI_Config.clock_rate)
-	{
-		bit_value++;
-
-		//Check for which SPI peripheral is enabled - this determines whether to use APB1 or APB2
-		if(SPI_Handle->SPIx == SPI1 || SPI_Handle->SPIx == SPI4)
-		{
-			clock_rate = (ClockSource.PCLCK1) >> (bit_value);
-		}
-		else
-		{
-			clock_rate = (ClockSource.PCLCK2) >> (bit_value);
-		}
-
-		//Ensure the while loop does not get caught in an infinte loop
-		if(bit_value > 8)
-		{
-			return;
-		}
-	}
-
 	//Set Baud rate control
-	SPI_Handle->SPIx->CR1 |= ((bit_value - 1) << CR1_BR_Pos);
+	SPI_Handle->SPIx->CR1 |= (SPI_Handle->SPI_Config.clock_divisor << CR1_BR_Pos);
 
 	//Set CPOL and CPHA
 	SPI_Handle->SPIx->CR1 |= ((SPI_Handle->SPI_Config.cpol) << CR1_CPOL_Pos);
@@ -267,7 +281,79 @@ void SPI_Init(SPI_Handle_t *SPI_Handle)
 	SPI_Handle->SPIx->CR1 |= ((SPI_Handle->SPI_Config.lsbfirst) << CR1_LSBFIRST_Pos);
 	SPI_Handle->SPIx->CR1 |= ((SPI_Handle->SPI_Config.data_frame) << CR1_DFF_Pos);
 
+}
+
+/*
+ * @brief	This function is used to transmit data on the MOSI pin.
+ *
+ * @note	This function can also be used by setting BIDIMODE = 1 and BIDIOE = 1, which enables
+ * 			bidirection transmission only. This would remove the chances of a value accidentally being
+ * 			written on the MISO line from the slave.
+ *
+ * @param	pTxBuffer: Holds an address for the array/pointer that holds the data to be transmitted.
+ *
+ * @param	num_of_bytes: Specifies the total number of bytes to be transmitted.
+ */
+void SPI_Transmit(SPI_Handle_t *SPI_Handle, uint8_t *pTxBuffer, uint8_t num_of_bytes)
+{
 	//Enable SPI peripheral
 	SPI_Handle->SPIx->CR1 |= CR1_SPE_Enable;
+
+	while(num_of_bytes > 0)
+	{
+		//Ensure the TxE flag is set
+		while(!(Check_Flag(SPI_Handle, SR_TXE_Flag)));
+
+		if(SPI_Handle->SPI_Config.data_frame == Data_8_Bits)
+		{
+			SPI_Handle->SPIx->DR = *(pTxBuffer);
+			num_of_bytes--;
+			pTxBuffer++;
+		}
+	}
+	Disable_SPI(SPI_Handle);
 }
+
+/*
+ * @brief	This funtion utilizes the full-duplex mode to read data from the registers.
+ *
+ * @note	The process to implement full-duplex communication for the stm32f4 is detailed in the reference
+ * 			manual.
+ *
+ * @param	pRxBuffer: Takes an address of a pointer/array to load data into.
+ *
+ * @param	num_of_bytes: Specifies the total number of bytes the user wishes to recieve.
+ *
+ * @param	reg_address: This takes the initial value to write to the MOSI pin which initiates the full-duplex data
+ * 			transfer. This would in most cases be the register address to read from.
+ */
+void SPI_Recieve(SPI_Handle_t *SPI_Handle, uint8_t *pRxBuffer, uint8_t num_of_bytes, uint8_t reg_address)
+{
+	uint8_t dumm_value = 0x00;
+
+	//Enable SPI peripheral
+	SPI_Handle->SPIx->CR1 |= CR1_SPE_Enable;
+
+	//Send the address to read data from
+	SPI_Handle->SPIx->DR = reg_address | 0x80;
+
+
+	while(num_of_bytes > 0)
+	{
+		//Check TXE flag and send dummy value
+		while(!(Check_Flag(SPI_Handle, SR_TXE_Flag)));
+		SPI_Handle->SPIx->DR = dumm_value;
+
+		//Ensure the RXNE flag is set
+		while(!(Check_Flag(SPI_Handle, SR_RXNE_Flag)));
+		*(pRxBuffer) = SPI_Handle->SPIx->DR;
+		num_of_bytes--;
+		pRxBuffer++;
+	}
+
+	Disable_SPI(SPI_Handle);
+}
+
+
+
 
