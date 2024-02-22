@@ -1,1 +1,4 @@
-../Src/main.c:4:5:main	88	static
+../Src/main.c:19:5:main	40	static
+../Src/main.c:93:6:SPI1_IRQHandler	8	static
+../Src/main.c:98:6:cs_enable	16	static
+../Src/main.c:110:6:cs_disable	16	static

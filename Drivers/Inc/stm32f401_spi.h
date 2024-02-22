@@ -7,62 +7,59 @@
 
 typedef struct
 {
-	uint8_t pin_nss;
+	uint8_t pin_cs;
+	uint8_t pin_clk;
 	uint8_t pin_mosi;
 	uint8_t pin_miso;
-	uint8_t pin_sck;
-	uint8_t ssm; 				//software slave management pin
-	uint8_t ssoe;				//slave select output enable
-	uint32_t clock_divisor;
-	uint8_t data_frame;
-	uint8_t lsbfirst;
-	uint8_t cpol;
-	uint8_t cpha;
-	uint8_t spi_bus_direction;
+	GPIO_TypeDef *cs_gpio;		//Used only when SSM is enabled
+	uint8_t baudrate_ctrl;		//Used to set the clock speed
+	uint8_t cpol;				//Used to set clock polarity
+	uint8_t cpha;				//Used to set clock phase
+	uint8_t data_format;		//Used to send the data either in LSB or MSB form
 }SPI_Config_t;
 
 typedef struct
 {
 	SPI_TypeDef *SPIx;
-	GPIO_TypeDef *GPIOx;		//Used to keep track of which port the nss pin in on
 	SPI_Config_t SPI_Config;
-	uint8_t *TxBuffer;
-	uint8_t *RxBuffer;
-	uint8_t num_of_bytes;
-	uint8_t Bus_State;			//Used to keep track of whether ot not there is a transfer on the bus
+	uint8_t data_frame;			//Used to set data to either 8 or 16 bits
+	uint8_t ssm;				//Used to either enable or disable SSM
+	uint8_t *pTxBuffer;			//Pointer to a tx buffer that will transmit data to DR
+	uint8_t tx_length;			//Used to track of number of bytes to transmit
+	uint8_t bus_state;			//Used to keep track of whether SPI is transmitting or receiving data
 }SPI_Handle_t;
+
 
 /*
  * @User Macros
  */
 
 /*Slave select management*/
-#define SSM_Disable								(0U)		//Disable slave software management
-#define SSM_Enable								(1U)		//Enables slave software management
-
-#define SSOE_Disable							(0U)		//Disables slave select output
-#define	SSOE_Enable								(1U)		//Enables slave select output
+#define SSM_Disable								(0U)							//Disable slave software management
+#define SSM_Enable								(1U)							//Enables slave software management
 
 /*Data framing*/
-#define Data_8_Bits								(0U)		//Sets the data frame to 8 bits
-#define Data_16_Bits							(1U)		//Sets the data frame to 16 bits
-#define MSB_First								(0U)		//Sends the MSB first
-#define	LSB_First								(1U)		//Sends the LSB first
-
-/*SPI bus direction*/
-#define SPI_Slave								(0U)		//Sets the MCU to slave device
-#define SPI_Master								(1U)		//Sets the MCU to master device
+#define Data_8_Bits								(0U)							//Sets the data frame to 8 bits
+#define Data_16_Bits							(1U)							//Sets the data frame to 16 bits
+#define MSB_First								(0U << CR1_LSBFIRST_Pos)		//Sends the MSB first
+#define	LSB_First								(1U << CR1_LSBFIRST_Pos)		//Sends the LSB first
 
 /*Clock Polarity*/
-#define Odd_Polarity							(0U)		//Clock to 0 when idle
-#define Even_Polarity							(1U)		//Clock to 1 when idle
+#define Odd_Polarity							(0U << CR1_CPOL_Pos)			//Clock to 0 when idle
+#define Even_Polarity							(1U << CR1_CPOL_Pos)			//Clock to 1 when idle
 
 /*Clock Phase*/
-#define Rising_Edge								(0U)		//first clock transition is first data capture edge
-#define Falling_Edge							(1U)		//Second clock transition is first data capture edge
+#define Rising_Edge								(0U << CR1_CPHA_Pos)			//first clock transition is first data capture edge
+#define Falling_Edge							(1U << CR1_CPHA_Pos)			//Second clock transition is first data capture edge
 
-#define Restart_Enable							(0U)
-#define Restart_Disable							(1U)
+/*Restart Condition*/
+#define Restart									(0U)							//Used if SSM is not set, to decide whether to disable SPI or
+#define No_Restart								(1U)							//just use a restart condition
+
+/*Bus state*/
+#define SPI_Ready								(0U)
+#define SPI_Transmitting						(1U)
+#define SPI_Receiving							(2U)
 
 /*Clock Divisor*/
 #define DIV2                                    (0U)
@@ -77,10 +74,11 @@ typedef struct
 /*
  * @CR1 Flags
  */
-#define CR1_BIDIMODE_Pos						(15U)
 #define CR1_BIDIMODE_Enable						(0x1UL << CR1_BIDIMODE_Pos)
-#define CR1_BIDIOE_Pos							(14U)
+#define CR1_BIDIMODE_Pos						(15U)
 #define CR1_BIDIOE_Flag							(0x1UL << CR1_BIDIOE_Pos)
+#define CR1_BIDIOE_Pos							(14U)
+#define CR1_DFF_Enable							(0x1UL << CR1_DFF_Pos)
 #define CR1_DFF_Pos								(11U)
 #define CR1_RXONLY_Pos							(10U)
 #define CR1_RXONLY_Enable						(0x1UL << CR1_RXONLY_Pos)
@@ -92,6 +90,7 @@ typedef struct
 #define CR1_SPE_Pos								(6U)
 #define CR1_SPE_Enable							(0x1UL << CR1_SPE_Pos)
 #define CR1_BR_Pos								(3U)
+#define CR1_MSTR_Enable							(0x1UL << CR1_MSTR_Pos)
 #define CR1_MSTR_Pos							(2U)
 #define CR1_CPOL_Pos							(1U)
 #define CR1_CPHA_Pos							(0U)
@@ -101,8 +100,10 @@ typedef struct
  */
 #define CR2_TXEIE_Pos							(7U)
 #define CR2_TXEIE_Enable						(0x1UL << CR2_TXEIE_Pos)
-#define CR2_RXNE_Pos							(6U)
-#define CR2_RXNE_Enable							(0x1UL << CR2_RXNE_Pos)
+#define CR2_RXNEIE_Pos							(6U)
+#define CR2_RXNEIE_Enable						(0x1UL << CR2_RXNEIE_Pos)
+#define CR2_ERRIE_Pos							(5U)
+#define CR2_ERRIE_Enable						(0x1UL << CR2_ERRIE_Pos)
 #define CR2_SSOE_Pos							(2U)
 #define CR2_SSOE_Enable							(0x1UL << CR2_SSOE_Pos)
 
@@ -111,6 +112,8 @@ typedef struct
  */
 #define SR_BSY_Pos								(7U)
 #define SR_BSY_Flag								(0x1UL << SR_BSY_Pos)
+#define SR_OVR_Pos								(6U)
+#define SR_OVR_Flag								(0x1UL << SR_OVR_Pos)
 #define SR_TXE_Pos								(1U)
 #define SR_TXE_Flag								(0x1UL << SR_TXE_Pos)
 #define SR_RXNE_Pos								(0U)
@@ -119,7 +122,12 @@ typedef struct
 /*
  * @Functions
  */
+
 void SPI_Init(SPI_Handle_t *SPI_Handle);
-void SPI_Transmit(SPI_Handle_t *SPI_Handle, uint8_t *pTxBuffer, uint8_t num_of_bytes);
-void SPI_Recieve(SPI_Handle_t *SPI_Handle, uint8_t *pRxBuffer, uint8_t num_of_bytes, uint8_t reg_address);
+void SPI_Transmit(SPI_Handle_t *SPI_Handle, uint8_t *pTxBuffer, uint32_t num_of_bytes, uint8_t restart_condition);
+void SPI_Receive(SPI_Handle_t *SPI_Handle, uint8_t *pRxBuffer, uint32_t num_of_bytes);
+void SPI_TransmitIT(SPI_Handle_t *SPI_Handle, uint8_t *input_buffer, uint32_t num_of_bytes);
+void SPI_IRQ_Handler(SPI_Handle_t *SPI_Handle);
+
+
 #endif /* STM32F401_SPI_H_ */

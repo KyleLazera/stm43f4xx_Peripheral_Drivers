@@ -127,5 +127,9 @@ void GPIO_ConfigLEDPA5(uint8_t State);
 uint8_t GPIO_ConfigButtonPC13(void);
 void GPIO_EXTIConfig(uint8_t port, uint8_t pin, uint8_t edge_trigger);
 
+void SPI1_Periph_Enable(uint8_t ssm_enabled, GPIO_TypeDef *GPIOx, uint8_t cs_pin, uint8_t clk_pin, uint8_t mosi_pin, uint8_t miso_pin);
+void SPI2_Periph_Enable(uint8_t ssm_enabled, GPIO_TypeDef *GPIOx, uint8_t cs_pin, uint8_t clk_pin, uint8_t mosi_pin, uint8_t miso_pin);
+void SPI3_Periph_Enable(uint8_t ssm_enabled, GPIO_TypeDef *GPIOx, uint8_t cs_pin, uint8_t clk_pin, uint8_t mosi_pin, uint8_t miso_pin);
+void SPI4_Periph_Enable(uint8_t ssm_enabled, GPIO_TypeDef *GPIOx, uint8_t cs_pin, uint8_t clk_pin, uint8_t mosi_pin, uint8_t miso_pin);
 
 #endif /* STM32F401_GPIO_H_ */

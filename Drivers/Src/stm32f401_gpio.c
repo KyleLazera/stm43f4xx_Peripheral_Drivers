@@ -267,6 +267,213 @@ void GPIO_Init(GPIO_Config_t *GPIO_Config, AFR_Config_t alt_function)
 }
 
 /*
+ * @Brief SPI peripheral enabled specified for SPI1. There are 3 other functions: 1 for each SPI peripheral.
+ */
+void SPI1_Periph_Enable(uint8_t ssm_enabled, GPIO_TypeDef *GPIOx, uint8_t cs_pin, uint8_t clk_pin, uint8_t mosi_pin, uint8_t miso_pin)
+{
+	GPIO_Config_t SPI1_Periph;
+
+	//Check if SSM bit is enabled
+	if(ssm_enabled)
+	{
+		//Config the specified pin and port for the chip select
+		GPIO_Config(&SPI1_Periph, GPIOx, cs_pin, GPIO_Output, GPIO_PushPull, GPIO_LowSpeed, GPIO_PullUp);
+		GPIO_Init(&SPI1_Periph, 0x00);
+	}
+	//If SSOE is enabled
+	else
+	{
+		//Configure the NSS pin for alternate function
+		GPIO_Config(&SPI1_Periph, GPIOA, cs_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI1_Periph, AF5);
+	}
+
+	//Configure the SPI clock pin
+	switch(clk_pin){
+	case 5:
+		GPIO_Config(&SPI1_Periph, GPIOA, clk_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI1_Periph, AF5);
+		break;
+	case 3:
+		GPIO_Config(&SPI1_Periph, GPIOB, clk_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI1_Periph, AF5);
+		break;
+	}
+
+	//Conigure MISO pin
+	switch(miso_pin){
+	case 6:
+		GPIO_Config(&SPI1_Periph, GPIOA, miso_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI1_Periph, AF5);
+		break;
+	case 4:
+		GPIO_Config(&SPI1_Periph, GPIOB, miso_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI1_Periph, AF5);
+		break;
+	}
+
+	//Configure MOSI pin
+	switch(mosi_pin){
+	case 7:
+		GPIO_Config(&SPI1_Periph, GPIOA, mosi_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI1_Periph, AF5);
+		break;
+	case 5:
+		GPIO_Config(&SPI1_Periph, GPIOB, mosi_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI1_Periph, AF5);
+		break;
+	}
+}
+
+void SPI2_Periph_Enable(uint8_t ssm_enabled, GPIO_TypeDef *GPIOx, uint8_t cs_pin, uint8_t clk_pin, uint8_t mosi_pin, uint8_t miso_pin)
+{
+	GPIO_Config_t SPI2_Periph;
+
+	//Check if SSM bit is enabled
+	if(ssm_enabled)
+	{
+		//Config the specified pin and port for the chip select
+		GPIO_Config(&SPI2_Periph, GPIOx, cs_pin, GPIO_Output, GPIO_PushPull, GPIO_LowSpeed, GPIO_PullUp);
+		GPIO_Init(&SPI2_Periph, 0x00);
+	}
+	//If SSOE is enabled
+	else
+	{
+		//Configure the NSS pin for alternate function
+		GPIO_Config(&SPI2_Periph, GPIOB, cs_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI2_Periph, AF5);
+	}
+
+	//Configure the SPI clock pin
+	switch(clk_pin){
+	case 3:
+		GPIO_Config(&SPI2_Periph, GPIOD, clk_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI2_Periph, AF5);
+		break;
+	default:
+		GPIO_Config(&SPI2_Periph, GPIOB, clk_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI2_Periph, AF5);
+		break;
+	}
+
+	//Conigure MISO pin
+	switch(miso_pin){
+	case 2:
+		GPIO_Config(&SPI2_Periph, GPIOC, miso_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI2_Periph, AF5);
+		break;
+	case 14:
+		GPIO_Config(&SPI2_Periph, GPIOB, miso_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI2_Periph, AF5);
+		break;
+	}
+
+	//Configure MOSI pin
+	switch(mosi_pin){
+	case 3:
+		GPIO_Config(&SPI2_Periph, GPIOC, mosi_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI2_Periph, AF5);
+		break;
+	case 15:
+		GPIO_Config(&SPI2_Periph, GPIOB, mosi_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI2_Periph, AF5);
+		break;
+	}
+}
+
+void SPI3_Periph_Enable(uint8_t ssm_enabled, GPIO_TypeDef *GPIOx, uint8_t cs_pin, uint8_t clk_pin, uint8_t mosi_pin, uint8_t miso_pin)
+{
+	GPIO_Config_t SPI3_Periph;
+
+	//Check if SSM bit is enabled
+	if(ssm_enabled)
+	{
+		//Config the specified pin and port for the chip select
+		GPIO_Config(&SPI3_Periph, GPIOx, cs_pin, GPIO_Output, GPIO_PushPull, GPIO_LowSpeed, GPIO_PullUp);
+		GPIO_Init(&SPI3_Periph, 0x00);
+	}
+	//If SSOE is enabled
+	else
+	{
+		//Configure the NSS pin for alternate function
+		GPIO_Config(&SPI3_Periph, GPIOA, cs_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI3_Periph, AF6);
+	}
+
+	//Configure the SPI clock pin
+	switch(clk_pin){
+	case 10:
+		GPIO_Config(&SPI3_Periph, GPIOC, clk_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI3_Periph, AF6);
+		break;
+	case 3:
+		GPIO_Config(&SPI3_Periph, GPIOB, clk_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI3_Periph, AF6);
+		break;
+	}
+
+	//Conigure MISO pin
+	switch(miso_pin){
+	case 11:
+		GPIO_Config(&SPI3_Periph, GPIOC, miso_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI3_Periph, AF6);
+		break;
+	case 4:
+		GPIO_Config(&SPI3_Periph, GPIOB, miso_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI3_Periph, AF6);
+		break;
+	}
+
+	//Configure MOSI pin
+	switch(mosi_pin){
+	case 12:
+		GPIO_Config(&SPI3_Periph, GPIOC, mosi_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI3_Periph, AF6);
+		break;
+	case 5:
+		GPIO_Config(&SPI3_Periph, GPIOB, mosi_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI3_Periph, AF6);
+		break;
+	case 6:
+		GPIO_Config(&SPI3_Periph, GPIOD, mosi_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI3_Periph, AF5);
+	}
+}
+
+void SPI4_Periph_Enable(uint8_t ssm_enabled, GPIO_TypeDef *GPIOx, uint8_t cs_pin, uint8_t clk_pin, uint8_t mosi_pin, uint8_t miso_pin)
+{
+	GPIO_Config_t SPI4_Periph;
+
+	//Check if SSM bit is enabled
+	if(ssm_enabled)
+	{
+		//Config the specified pin and port for the chip select
+		GPIO_Config(&SPI4_Periph, GPIOx, cs_pin, GPIO_Output, GPIO_PushPull, GPIO_LowSpeed, GPIO_PullUp);
+		GPIO_Init(&SPI4_Periph, 0x00);
+	}
+	//If SSOE is enabled
+	else
+	{
+		//Configure the NSS pin for alternate function
+		GPIO_Config(&SPI4_Periph, GPIOE, cs_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+		GPIO_Init(&SPI4_Periph, AF5);
+	}
+
+	//Configure the SPI clock pin
+	GPIO_Config(&SPI4_Periph, GPIOE, clk_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+	GPIO_Init(&SPI4_Periph, AF5);
+
+	//Configure MISO Pin
+	GPIO_Config(&SPI4_Periph, GPIOE, miso_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+	GPIO_Init(&SPI4_Periph, AF5);
+
+	//Configure MOSI pin
+	GPIO_Config(&SPI4_Periph, GPIOE, mosi_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
+	GPIO_Init(&SPI4_Periph, AF5);
+
+}
+
+/*
  *@brief	Accesses the output data register and allows the user to write data to the specified
  *			GPIO pin.
  *
