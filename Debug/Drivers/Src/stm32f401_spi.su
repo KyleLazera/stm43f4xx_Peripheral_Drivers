@@ -1,11 +1,14 @@
 C:/Users/klaze/Documents/Chip Headers/CMSIS/Include/core_cm4.h:1688:22:__NVIC_EnableIRQ	16	static
-../Drivers/Src/stm32f401_spi.c:15:20:Check_Flag	16	static
-../Drivers/Src/stm32f401_spi.c:32:13:Disable_SPI	16	static
-../Drivers/Src/stm32f401_spi.c:44:6:SPI_Init	40	static
-../Drivers/Src/stm32f401_spi.c:122:6:SPI_Transmit	32	static
-../Drivers/Src/stm32f401_spi.c:169:6:SPI_Receive	32	static
-../Drivers/Src/stm32f401_spi.c:217:13:Enable_NVIC	16	static
-../Drivers/Src/stm32f401_spi.c:240:13:Disable_SPI_Transmission	24	static
-../Drivers/Src/stm32f401_spi.c:262:13:TXE_Interrupt_Handler	24	static
-../Drivers/Src/stm32f401_spi.c:279:6:SPI_TransmitIT	24	static
-../Drivers/Src/stm32f401_spi.c:302:6:SPI_IRQ_Handler	24	static
+../Drivers/Src/stm32f401_spi.c:8:20:Check_Flag	16	static
+../Drivers/Src/stm32f401_spi.c:25:13:Disable_SPI	16	static
+../Drivers/Src/stm32f401_spi.c:37:6:SPI_Init	40	static
+../Drivers/Src/stm32f401_spi.c:115:6:SPI_Transmit	32	static
+../Drivers/Src/stm32f401_spi.c:171:6:SPI_Receive	32	static
+../Drivers/Src/stm32f401_spi.c:223:13:Enable_NVIC	16	static
+../Drivers/Src/stm32f401_spi.c:239:13:Disable_SPI_Transmission	24	static
+../Drivers/Src/stm32f401_spi.c:257:13:Disable_SPI_Reception	16	static
+../Drivers/Src/stm32f401_spi.c:274:13:TXE_Interrupt_Handler	16	static
+../Drivers/Src/stm32f401_spi.c:314:13:RXNE_Interrupt_Handler	16	static
+../Drivers/Src/stm32f401_spi.c:345:6:SPI_TransmitIT	24	static
+../Drivers/Src/stm32f401_spi.c:368:6:SPI_ReceiveIT	24	static
+../Drivers/Src/stm32f401_spi.c:394:6:SPI_IRQ_Handler	24	static

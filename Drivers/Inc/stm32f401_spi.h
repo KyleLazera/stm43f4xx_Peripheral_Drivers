@@ -27,6 +27,9 @@ typedef struct
 	uint8_t *pTxBuffer;			//Pointer to a tx buffer that will transmit data to DR
 	uint8_t tx_length;			//Used to track of number of bytes to transmit
 	uint8_t bus_state;			//Used to keep track of whether SPI is transmitting or receiving data
+	uint8_t *pRxBuffer;			//Pointer to the RxBuffer
+	uint8_t rx_length;			//Keep track of the number of bytes to receieve
+	uint8_t reg_address;
 }SPI_Handle_t;
 
 
@@ -126,7 +129,8 @@ typedef struct
 void SPI_Init(SPI_Handle_t *SPI_Handle);
 void SPI_Transmit(SPI_Handle_t *SPI_Handle, uint8_t *pTxBuffer, uint32_t num_of_bytes, uint8_t restart_condition);
 void SPI_Receive(SPI_Handle_t *SPI_Handle, uint8_t *pRxBuffer, uint32_t num_of_bytes);
-void SPI_TransmitIT(SPI_Handle_t *SPI_Handle, uint8_t *input_buffer, uint32_t num_of_bytes);
+void SPI_TransmitIT(SPI_Handle_t *SPI_Handle, uint8_t *input_buffer, uint8_t num_of_bytes);
+void SPI_ReceiveIT(SPI_Handle_t *SPI_Handle, uint8_t *output_buffer, uint8_t num_of_bytes, uint8_t address);
 void SPI_IRQ_Handler(SPI_Handle_t *SPI_Handle);
 
 

@@ -4,10 +4,12 @@ int16_t x, y, z;
 double xg, yg, zg;
 
 
-uint8_t adxl_data_rec[6];
+uint8_t adxl_data_rec[7];
 uint8_t bme_data_rec[9];
 uint8_t bme_address[1] = {0xF7};
 uint8_t adxl_address[1] = {0xF2};
+uint8_t adxl_address1 = 0xF2;
+int work_done = 0;
 
 SPI_Handle_t SPI1_Example;
 UART_Config_t Debug;
@@ -36,7 +38,7 @@ int main()
 
 	SPI1_Example.ssm = SSM_Disable;
 	SPI1_Example.SPIx = SPI1;
-	SPI1_Example.SPI_Config.baudrate_ctrl = DIV32;
+	SPI1_Example.SPI_Config.baudrate_ctrl = DIV4;
 	SPI1_Example.SPI_Config.cpha = Falling_Edge;
 	SPI1_Example.SPI_Config.cpol = Even_Polarity;
 	SPI1_Example.SPI_Config.data_format = MSB_First;
@@ -45,19 +47,23 @@ int main()
 	SPI_Init(&SPI1_Example);
 
 	//cs_enable(0);
-	SPI_Transmit(&SPI1_Example, adxl_init2, 2, No_Restart);
+	//SPI_Transmit(&SPI1_Example, adxl_init2, 2, No_Restart);
+	SPI_TransmitIT(&SPI1_Example, adxl_init2, 2);
 	//cs_disable(0);
 
 	//cs_enable(0);
-	SPI_Transmit(&SPI1_Example, adxl_init1, 2, No_Restart);
+	//SPI_Transmit(&SPI1_Example, adxl_init1, 2, No_Restart);
+	SPI_TransmitIT(&SPI1_Example, adxl_init1, 2);
 	//cs_disable(0);
 
 	//cs_enable(0);
-	SPI_Transmit(&SPI1_Example, adxl_init4, 2, No_Restart);
+	//SPI_Transmit(&SPI1_Example, adxl_init4, 2, No_Restart);
+	SPI_TransmitIT(&SPI1_Example, adxl_init4, 2);
 	//cs_disable(0);
 
 	//cs_enable(0);
-	SPI_Transmit(&SPI1_Example, adxl_init3, 2, No_Restart);
+	//SPI_Transmit(&SPI1_Example, adxl_init3, 2, No_Restart);
+	SPI_TransmitIT(&SPI1_Example, adxl_init3, 2);
 	//cs_disable(0);
 
 
@@ -65,15 +71,13 @@ int main()
 	//SPI_Transmit(&SPI1_Example, bme_init, 6, Restart);
 	//cs_disable(0);
 
-
-	int work_done = 0;
-
 	while(1)
 	{
 		//cs_enable(0);
-		SPI_Transmit(&SPI1_Example, adxl_address, 1, Restart);
-		SPI_Receive(&SPI1_Example, adxl_data_rec, 6);
+		//SPI_Transmit(&SPI1_Example, adxl_address, 1, Restart);
+		//SPI_Receive(&SPI1_Example, adxl_data_rec, 6);
 		//cs_disable(0);
+		SPI_ReceiveIT(&SPI1_Example, adxl_data_rec, 7, *adxl_address);
 
 
 		x = ((adxl_data_rec[2] << 8) | adxl_data_rec[1]);
@@ -87,6 +91,8 @@ int main()
 		xg = (x * 0.0078);
 		yg = (y * 0.0078);
 		zg = (z * 0.0078);
+
+		work_done++;
 	}
 }
 

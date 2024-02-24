@@ -1,12 +1,5 @@
 #include "stm32f401_spi.h"
 
-#define SPI1EN		(1U << 12)
-#define GPIOAEN		(1U << 0)
-
-#define SR_TXE		(1U << 1)
-#define SR_RXNE		(1U << 0)
-#define SR_BSY		(1U << 7)
-
 /*
  * brief	A helper function that keeps track of specific flags in the status register.
  *
@@ -122,8 +115,12 @@ void SPI_Init(SPI_Handle_t *SPI_Handle)
 void SPI_Transmit(SPI_Handle_t *SPI_Handle, uint8_t *pTxBuffer, uint32_t num_of_bytes, uint8_t restart_condition)
 {
 	uint32_t temp;
+	uint8_t ssm_enabled = SPI_Handle->ssm;
 
-	//Enable SPI periph
+	/* Enable SPI peripheral - This is necessary if the SSM is disabled and SSOE is being used.
+	 * As soon as the peripheral is enabled the CS bit it pulled low in SSOE mode.
+	 * In SSM mode this is replaced by pulling the specified GPIO pin low.
+	 */
 	SPI_Handle->SPIx->CR1 |= CR1_SPE_Enable;
 
 	//If data frame is set to 16 bits
@@ -158,7 +155,10 @@ void SPI_Transmit(SPI_Handle_t *SPI_Handle, uint8_t *pTxBuffer, uint32_t num_of_
 	temp = SPI_Handle->SPIx->DR;
 	temp = SPI_Handle->SPIx->SR;
 
-	if(restart_condition)
+	/*Used when in SSOE mode. This can prevent the SPI from pulling CS high if restart_condition
+	 * is set to restart. This can be used if you want to send an address to read from a slave.
+	 */
+	if(restart_condition && !ssm_enabled)
 	{
 		Disable_SPI(SPI_Handle);
 	}
@@ -173,7 +173,10 @@ void SPI_Receive(SPI_Handle_t *SPI_Handle, uint8_t *pRxBuffer, uint32_t num_of_b
 	uint8_t dummy_byte = 0x00;
 	uint8_t ssm_enabled = SPI_Handle->ssm;
 
-	//Enable SPI periph - Mainly used if SSM is disabled
+	/* Enable SPI peripheral - This is necessary if the SSM is disabled and SSOE is being used.
+	 * As soon as the peripheral is enabled the CS bit it pulled low in SSOE mode.
+	 * In SSM mode this is replaced by pulling the specified GPIO pin low.
+	 */
 	SPI_Handle->SPIx->CR1 |= CR1_SPE_Enable;
 
 	//If Data frame is set to 16 bits
@@ -199,9 +202,9 @@ void SPI_Receive(SPI_Handle_t *SPI_Handle, uint8_t *pRxBuffer, uint32_t num_of_b
 			while(!Check_Flag(SPI_Handle, SR_TXE_Flag)){}
 			SPI_Handle->SPIx->DR = dummy_byte;
 			//Ensure RXNE flag is raised and read value from data register
-			 while(!Check_Flag(SPI_Handle, SR_RXNE_Flag)){}
-			 *pRxBuffer++ = SPI_Handle->SPIx->DR;
-			 num_of_bytes--;
+			while(!Check_Flag(SPI_Handle, SR_RXNE_Flag)){}
+			*pRxBuffer++ = SPI_Handle->SPIx->DR;
+			num_of_bytes--;
 		}
 	}
 
@@ -219,23 +222,16 @@ void SPI_Receive(SPI_Handle_t *SPI_Handle, uint8_t *pRxBuffer, uint32_t num_of_b
  */
 static void Enable_NVIC(SPI_Handle_t *SPI_Handle)
 {
-	if(SPI_Handle->SPIx == SPI1)
-	{
+	if(SPI_Handle->SPIx == SPI1){
 		NVIC_EnableIRQ(SPI1_IRQn);
 	}
-
-	else if(SPI_Handle->SPIx == SPI2)
-	{
+	else if(SPI_Handle->SPIx == SPI2){
 		NVIC_EnableIRQ(SPI2_IRQn);
 	}
-
-	else if(SPI_Handle->SPIx == SPI3)
-	{
+	else if(SPI_Handle->SPIx == SPI3){
 		NVIC_EnableIRQ(SPI3_IRQn);
 	}
-
-	else
-	{
+	else{
 		NVIC_EnableIRQ(SPI4_IRQn);
 	}
 }
@@ -245,18 +241,31 @@ static void Disable_SPI_Transmission(SPI_Handle_t *SPI_Handle)
 	uint32_t clear_overrun;
 
 	while(!Check_Flag(SPI_Handle, SR_TXE_Flag));
-
 	//Disable TXEIE bit in CR2
 	SPI_Handle->SPIx->CR2 &= ~CR2_TXEIE_Enable;
-
 	while(Check_Flag(SPI_Handle, SR_BSY_Flag));
-
 	//Clear overrun flag
 	clear_overrun = SPI_Handle->SPIx->DR;
 	clear_overrun = SPI_Handle->SPIx->SR;
 
-	SPI_Handle->bus_state = SPI_Ready;
+	//Disable SPI periph
+	SPI_Handle->SPIx->CR1 &= ~CR1_SPE_Enable;
 
+	SPI_Handle->bus_state = SPI_Ready;
+}
+
+static void Disable_SPI_Reception(SPI_Handle_t *SPI_Handle)
+{
+	while(!Check_Flag(SPI_Handle, SR_TXE_Flag));
+	//Disable TXEIE bit in CR2
+	SPI_Handle->SPIx->CR2 &= ~CR2_TXEIE_Enable;
+	SPI_Handle->SPIx->CR2 &= ~CR2_RXNEIE_Enable;
+	while(Check_Flag(SPI_Handle, SR_BSY_Flag));
+
+	//Disable SPI periph
+	SPI_Handle->SPIx->CR1 &= ~CR1_SPE_Enable;
+
+	SPI_Handle->bus_state = SPI_Ready;
 }
 
 /*
@@ -264,22 +273,76 @@ static void Disable_SPI_Transmission(SPI_Handle_t *SPI_Handle)
  */
 static void TXE_Interrupt_Handler(SPI_Handle_t *SPI_Handle)
 {
-	uint8_t cs_pin = SPI_Handle->SPI_Config.pin_cs;
-
-	//TODO: add 16 bit and 8 bit dependencies
-	if(SPI_Handle->tx_length)
+	if(SPI_Handle->bus_state == SPI_Transmitting)
 	{
-		SPI_Handle->SPIx->DR = *(SPI_Handle->pTxBuffer++);
-		SPI_Handle->tx_length--;
+		if(SPI_Handle->data_frame == Data_16_Bits)
+		{
+			if(SPI_Handle->tx_length)
+			{
+				SPI_Handle->SPIx->DR = *((uint16_t *)SPI_Handle->pTxBuffer++);
+				SPI_Handle->tx_length--;
+			}
+
+			if(SPI_Handle->tx_length == 0 && (!SPI_Handle->ssm))
+			{
+				Disable_SPI_Transmission(SPI_Handle);
+			}
+		}
+		else
+		{
+			if(SPI_Handle->tx_length)
+			{
+				SPI_Handle->SPIx->DR = *(SPI_Handle->pTxBuffer++);
+				SPI_Handle->tx_length--;
+			}
+
+			if(SPI_Handle->tx_length == 0 && (!SPI_Handle->ssm))
+			{
+				Disable_SPI_Transmission(SPI_Handle);
+			}
+		}
 	}
-
-	if(SPI_Handle->tx_length == 0 && (!SPI_Handle->ssm))
+	//Used for Receiving data in Full duplex mode
+	else
 	{
-		Disable_SPI_Transmission(SPI_Handle);
+		//Transmit the address of the register to read from
+		SPI_Handle->SPIx->DR = SPI_Handle->reg_address;
+
 	}
 }
 
-void SPI_TransmitIT(SPI_Handle_t *SPI_Handle, uint8_t *input_buffer, uint32_t num_of_bytes)
+static void RXNE_Interrupt_Handler(SPI_Handle_t *SPI_Handle)
+{
+
+	if(SPI_Handle->data_frame == Data_16_Bits)
+	{
+		//If rx_length is greater than 0
+		if(SPI_Handle->rx_length)
+		{
+			//Read value from Data register inot buffer
+			*((uint16_t *)SPI_Handle->pRxBuffer++) = SPI_Handle->SPIx->DR;
+			SPI_Handle->rx_length--;
+		}
+	}
+	else
+	{
+		//If rx_length is greater than 0
+		if(SPI_Handle->rx_length)
+		{
+			//Read value from Data register inot buffer
+			*(SPI_Handle->pRxBuffer++) = SPI_Handle->SPIx->DR;
+			SPI_Handle->rx_length--;
+		}
+	}
+
+
+	if(SPI_Handle->rx_length == 0 && (!SPI_Handle->ssm))
+	{
+		Disable_SPI_Reception(SPI_Handle);
+	}
+}
+
+void SPI_TransmitIT(SPI_Handle_t *SPI_Handle, uint8_t *input_buffer, uint8_t num_of_bytes)
 {
 	//If bus is not currently transmitting/receiving
 	if(SPI_Handle->bus_state == SPI_Ready)
@@ -291,14 +354,40 @@ void SPI_TransmitIT(SPI_Handle_t *SPI_Handle, uint8_t *input_buffer, uint32_t nu
 		//Enable NVIC interrupts
 		Enable_NVIC(SPI_Handle);
 
+		if(!SPI_Handle->ssm)
+		{
+			//Enable SPI periph
+			SPI_Handle->SPIx->CR1 |= CR1_SPE_Enable;
+		}
+
 		//Enable TXEIE bit in CR2
 		SPI_Handle->SPIx->CR2 |= CR2_TXEIE_Enable;
+	}
+}
+
+void SPI_ReceiveIT(SPI_Handle_t *SPI_Handle, uint8_t *output_buffer, uint8_t num_of_bytes, uint8_t address)
+{
+	if(SPI_Handle->bus_state == SPI_Ready)
+	{
+		SPI_Handle->pRxBuffer = output_buffer;
+		SPI_Handle->rx_length = num_of_bytes;
+		SPI_Handle->reg_address = address;
+		SPI_Handle->bus_state = SPI_Receiving;
+
+		//Enable NVIC interrupts
+		Enable_NVIC(SPI_Handle);
+
+		//Enable TXEIE and RXNEIE bit in CR2
+		SPI_Handle->SPIx->CR2 |= CR2_TXEIE_Enable;
+		SPI_Handle->SPIx->CR2 |= CR2_RXNEIE_Enable;
 
 		if(!SPI_Handle->ssm)
 		{
 			//Enable SPI periph
 			SPI_Handle->SPIx->CR1 |= CR1_SPE_Enable;
 		}
+
+
 	}
 }
 
@@ -306,12 +395,22 @@ void SPI_IRQ_Handler(SPI_Handle_t *SPI_Handle)
 {
 	uint32_t temp1, temp2;
 
+	temp1 = ((SPI_Handle->SPIx->CR2 & CR2_RXNEIE_Enable) >> 6);
+	temp2 = (SPI_Handle->SPIx->SR & SR_RXNE_Flag);
+	if(temp1 && temp2)
+	{
+		RXNE_Interrupt_Handler(SPI_Handle);
+	}
+
+
 	temp1 = ((SPI_Handle->SPIx->CR2 & CR2_TXEIE_Enable) >> 7);
 	temp2 = ((SPI_Handle->SPIx->SR & SR_TXE_Flag) >> 1);
 	if(temp1 && temp2)
 	{
 		TXE_Interrupt_Handler(SPI_Handle);
 	}
+
+
 }
 
 
