@@ -246,8 +246,6 @@ void GPIO_Init(GPIO_Config_t *GPIO_Config, AFR_Config_t alt_function)
 
 	else
 	{
-		GPIO_Config->GPIO_Port->MODER &= ~(GPIO_Mode_Reset << (pin * 2));
-		GPIO_Config->GPIO_Port->MODER |= ((GPIO_Config->GPIO_MODE) << (pin * 2));
 
 		if(GPIO_Config->GPIO_MODE == GPIO_AF)
 		{
@@ -262,6 +260,9 @@ void GPIO_Init(GPIO_Config_t *GPIO_Config, AFR_Config_t alt_function)
 
 		GPIO_Config->GPIO_Port->PUPDR &= ~(GPIO_PUPD_Reset << (pin * 2));
 		GPIO_Config->GPIO_Port->PUPDR |= ((GPIO_Config->GPIO_PUPD) << (pin * 2));
+
+		GPIO_Config->GPIO_Port->MODER &= ~(GPIO_Mode_Reset << (pin * 2));
+		GPIO_Config->GPIO_Port->MODER |= ((GPIO_Config->GPIO_MODE) << (pin * 2));
 	}
 
 }
@@ -273,20 +274,20 @@ void SPI1_Periph_Enable(uint8_t ssm_enabled, GPIO_TypeDef *GPIOx, uint8_t cs_pin
 {
 	GPIO_Config_t SPI1_Periph;
 
-	//Check if SSM bit is enabled
-	if(ssm_enabled)
-	{
-		//Config the specified pin and port for the chip select
-		GPIO_Config(&SPI1_Periph, GPIOx, cs_pin, GPIO_Output, GPIO_PushPull, GPIO_LowSpeed, GPIO_PullUp);
-		GPIO_Init(&SPI1_Periph, 0x00);
-	}
-	//If SSOE is enabled
-	else
+	//Check if SSM bit is disabled
+	if(!ssm_enabled)
 	{
 		//Configure the NSS pin for alternate function
 		GPIO_Config(&SPI1_Periph, GPIOA, cs_pin, GPIO_AF, GPIO_PushPull, GPIO_LowSpeed, GPIO_PUPD_None);
 		GPIO_Init(&SPI1_Periph, AF5);
 	}
+	//If SSOE is enabled
+	/*else
+	{
+		//Configure the NSS pin for alternate function
+		GPIO_Config(&SPI1_Periph, GPIOA, Pin9, GPIO_Output, GPIO_PushPull, GPIO_HighSpeed, GPIO_PullUp);
+		GPIO_Init(&SPI1_Periph, 0x0);
+	}*/
 
 	//Configure the SPI clock pin
 	switch(clk_pin){

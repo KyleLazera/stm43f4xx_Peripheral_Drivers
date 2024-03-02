@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include "stm32f4xx.h"
 #include "stm32f401_i2c.h"
+#include "stm32f401_gpio.h"
 
 #ifndef STM32F401_SPI_H_
 #define STM32F401_SPI_H_
@@ -30,6 +31,7 @@ typedef struct
 	uint8_t *pRxBuffer;			//Pointer to the RxBuffer
 	uint8_t rx_length;			//Keep track of the number of bytes to receieve
 	uint8_t reg_address;
+	GPIO_Config_t *Slave;		//Used to hold the instance of the slave - only used in multislave interrupt mode
 }SPI_Handle_t;
 
 
@@ -131,6 +133,8 @@ void SPI_Transmit(SPI_Handle_t *SPI_Handle, uint8_t *pTxBuffer, uint32_t num_of_
 void SPI_Receive(SPI_Handle_t *SPI_Handle, uint8_t *pRxBuffer, uint32_t num_of_bytes);
 void SPI_TransmitIT(SPI_Handle_t *SPI_Handle, uint8_t *input_buffer, uint8_t num_of_bytes);
 void SPI_ReceiveIT(SPI_Handle_t *SPI_Handle, uint8_t *output_buffer, uint8_t num_of_bytes, uint8_t address);
+void SPI_MultiSlave_TransmitIT(SPI_Handle_t *SPI_Handle, GPIO_Config_t *Slave_Device, uint8_t *input_buffer, uint8_t num_of_bytes);
+void SPI_MultiSlave_RecieveIT(SPI_Handle_t *SPI_Handle, GPIO_Config_t *Slave_Device, uint8_t *output_buffer, uint8_t num_of_bytes, uint8_t address);
 void SPI_IRQ_Handler(SPI_Handle_t *SPI_Handle);
 
 
