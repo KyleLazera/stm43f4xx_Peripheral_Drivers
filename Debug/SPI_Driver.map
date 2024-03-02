@@ -396,21 +396,6 @@ Discarded input sections
  .debug_frame   0x0000000000000000      0x228 ./Drivers/Src/stm32f401_uart.o
  .ARM.attributes
                 0x0000000000000000       0x34 ./Drivers/Src/stm32f401_uart.o
- .group         0x0000000000000000        0xc ./Src/main.o
- .text          0x0000000000000000        0x0 ./Src/main.o
- .data          0x0000000000000000        0x0 ./Src/main.o
- .bss           0x0000000000000000        0x0 ./Src/main.o
- .debug_info    0x0000000000000000       0x22 ./Src/main.o
- .debug_abbrev  0x0000000000000000       0x12 ./Src/main.o
- .debug_aranges
-                0x0000000000000000       0x18 ./Src/main.o
- .debug_macro   0x0000000000000000       0x11 ./Src/main.o
- .debug_macro   0x0000000000000000      0xab4 ./Src/main.o
- .debug_line    0x0000000000000000       0x2e ./Src/main.o
- .debug_str     0x0000000000000000     0x2dbe ./Src/main.o
- .comment       0x0000000000000000       0x44 ./Src/main.o
- .ARM.attributes
-                0x0000000000000000       0x34 ./Src/main.o
  .group         0x0000000000000000        0xc ./Src/spi_adxl345_blocking.o
  .text          0x0000000000000000        0x0 ./Src/spi_adxl345_blocking.o
  .data          0x0000000000000000        0x0 ./Src/spi_adxl345_blocking.o
@@ -940,7 +925,6 @@ LOAD ./Drivers/Src/stm32f401_i2c.o
 LOAD ./Drivers/Src/stm32f401_rcc.o
 LOAD ./Drivers/Src/stm32f401_spi.o
 LOAD ./Drivers/Src/stm32f401_uart.o
-LOAD ./Src/main.o
 LOAD ./Src/spi_adxl345_blocking.o
 LOAD ./Src/spi_adxl345_interrupt.o
 LOAD ./Src/spi_adxl345_interrupt_multislave.o
@@ -1386,12 +1370,12 @@ LOAD C:/ST/STM32CubeIDE_1.12.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .debug_macro   0x000000000000e15f      0x16c ./Drivers/Src/stm32f401_spi.o
  .debug_macro   0x000000000000e2cb      0x107 ./Src/spi_adxl345_interrupt_multislave.o
 
-.debug_line     0x0000000000000000     0x27d6
+.debug_line     0x0000000000000000     0x27d8
  .debug_line    0x0000000000000000      0xc4b ./Drivers/Src/stm32f401_gpio.o
  .debug_line    0x0000000000000c4b      0x820 ./Drivers/Src/stm32f401_rcc.o
- .debug_line    0x000000000000146b      0xc1d ./Drivers/Src/stm32f401_spi.o
- .debug_line    0x0000000000002088      0x6d3 ./Src/spi_adxl345_interrupt_multislave.o
- .debug_line    0x000000000000275b       0x7b ./Startup/startup_stm32f401retx.o
+ .debug_line    0x000000000000146b      0xc1f ./Drivers/Src/stm32f401_spi.o
+ .debug_line    0x000000000000208a      0x6d3 ./Src/spi_adxl345_interrupt_multislave.o
+ .debug_line    0x000000000000275d       0x7b ./Startup/startup_stm32f401retx.o
 
 .debug_str      0x0000000000000000    0x521e4
  .debug_str     0x0000000000000000    0x50cb6 ./Drivers/Src/stm32f401_gpio.o
