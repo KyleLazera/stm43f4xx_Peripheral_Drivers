@@ -1,4 +1,4 @@
-//#include "stm32f401_spi.h"
+#include "stm32f401_spi.h"
 
 /*
  * This is a basic SPI blocking function that utilizes the built in slave select feature provided by the MCU. To change this feature to enable
@@ -7,38 +7,30 @@
  * see the adxl345 multislave interrupt example.
  */
 
-//SPI_Handle_t SPI1_Example;
-//GPIO_Config_t Slave1;
+SPI_Handle_t SPI1_Example;
 
 /*
- * Uncomment code below and comment the equivelent variables in the main() out to use the
- * live expressions debuggin feature.
+ * The variables below hold the data read in and are made global purely to use the live expression debugger,
+ * and keep track of the variable values.
  */
-//int16_t x, y, z;
-//double xg, yg, zg;
-//uint8_t adxl_data_rec[6];
+int16_t x, y, z;
+double xg, yg, zg;
+uint8_t adxl_data_rec[6];
 
-/*void SPI_Specs_Init();
+void SPI_Specs_Init();
 
 int main()
 {
 	/*
 	 * Data that holds the address of the data registers of the ADXL - this is where data will be read
 	 * from (Not the address of the device). A buffer that will hold the data being read.
-	 *
+	 */
 	uint8_t adxl_address[1] = {0xF2};
-	uint8_t adxl_data_rec[6];
-
-	/*
-	 * Variables used for configuring the data read from the device.
-	 *
-	int16_t x, y, z;
-	double xg, yg, zg;
 
 	/*
 	 * Functions to initialize the ADXL registers to set range to +- 4g, to allow
 	 * continous reading of the data registers and set the transfer rate to 100Hz.
-	 *
+	 */
 	uint8_t adxl_set_data_format[2] = {0x31, 0x01};
 	uint8_t adxl_clear_powerctl_reg[2] = {0x2D, 0x00};
 	uint8_t adxl_set_powerctl_reg[2] = {0x2D, 0x08};
@@ -50,7 +42,7 @@ int main()
 
 	/*
 	 * Initial Transmission to send to the ADXL. Sets the ADXL to specified settings.
-	 *
+	 */
 	SPI_Transmit(&SPI1_Example, adxl_clear_powerctl_reg, 2, No_Restart);
 	SPI_Transmit(&SPI1_Example, adxl_set_data_format, 2, No_Restart);
 	SPI_Transmit(&SPI1_Example, daxl_set_bw_rate_reg, 2, No_Restart);
@@ -91,6 +83,6 @@ void SPI_Specs_Init()
 	SPI1_Example.SPI_Config.cpol = Even_Polarity;
 	SPI1_Example.SPI_Config.data_format = MSB_First;
 	SPI1_Example.data_frame = Data_8_Bits;
-}*/
+}
 
 
